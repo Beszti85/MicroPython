@@ -15,6 +15,9 @@ potentiometer = ADC(28)
 buzz_pwm   = machine.PWM(machine.Pin(5))
 sensor_pir = Pin(6, Pin.IN, Pin.PULL_DOWN)
 alarm_out  = Pin(7, Pin.OUT)
+lcd_pwm    = machine.PWM(machine.Pin(8))
+lcd_pwm.freq(1000)
+lcd_pwm.duty_u16(50000)
 i2c_board  = I2C(0, scl = Pin(21), sda = Pin(20), freq = 100000)
 spi_board  = SPI(0, sck = Pin(18), mosi = Pin(19), miso = Pin(16), baudrate = 1000000)
 
@@ -54,8 +57,10 @@ wlan.connect('','')
 def blink(timer):
     #led_red.toggle()
     #buzz.toggle()
-    led.duty_u16(potentiometer.read_u16())
-    buzz_pwm.duty_u16(potentiometer.read_u16())
+    pwm_duty = potentiometer.read_u16()
+    led.duty_u16(pwm_duty)
+    buzz_pwm.duty_u16(pwm_duty)
+    lcd_pwm.duty_u16(pwm_duty)
 
 #buzz.value(0)
 
@@ -75,7 +80,6 @@ else:
     print( 'ip = ' + status[0] )
     
 while True:
-    time.sleep(10)
     sensor_dht11.measure()
     dht11_temp = (sensor_dht11.temperature())
     dht11_hum = (sensor_dht11.humidity())
@@ -86,3 +90,9 @@ while True:
     print("Internal tempreature: {}".format(adc_temperature))
     print("Temperature: {}".format(dht11_temp))
     print("Humidity: {}".format(dht11_hum))
+    int_val  = i2c_board.readfrom(0x20, 1)[0]
+    print(int_val)
+    print(i2c_board.readfrom(0x20, 1))
+    #lcd_i2c.toggle_led_yellow()
+    
+    time.sleep(5)
