@@ -69,8 +69,8 @@ print("Hello")
 
 midi = adafruit_midi.MIDI(midi_out=usb_midi.ports[1], out_channel=0)
 
-out_pins = [board.GP2, board.GP3, board.GP4, board.GP5, board.GP6]
-kd_pins  = [board.GP7, board.GP8, board.GP9]
+out_pins = [board.GP2, board.GP3, board.GP4, board.GP5, board.GP8]
+kd_pins  = [board.GP13, board.GP15, board.GP14]
 
 kd_buttons = []
 s_output = []
@@ -190,10 +190,10 @@ while True:
     s_output[4].value = 0
     
     pitchCnt += 1
-    if pitchCnt == 100:
+    if pitchCnt == 50:
         pitchValue = adcPitchBend.value
     
-        if abs(pitchValue - pitchValueLast) > 120:
+        if abs(pitchValue - pitchValueLast) > 400:
             midi.send(PitchBend(pitchValue >> 2))
         
         pitchCnt = 0
