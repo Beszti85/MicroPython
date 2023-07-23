@@ -5,6 +5,7 @@ import utime
 import time
 import dht
 from ds1307 import DS1307
+from lcd_pcf8574 import I2cLcd
 
 sensor_dht11 = dht.DHT11(machine.Pin(2))
 #led_red = Pin(3, Pin.OUT)
@@ -35,6 +36,8 @@ print([hex(x) for x in rtcTime])
 
 timer = Timer()
 tim_buzzer = Timer()
+
+lcd_i2c = I2cLcd(i2c_board, 0x20)
 
 def buzz_stop(tim_buzzer):
     buzz.value(0)
@@ -93,6 +96,6 @@ while True:
     int_val  = i2c_board.readfrom(0x20, 1)[0]
     print(int_val)
     print(i2c_board.readfrom(0x20, 1))
-    #lcd_i2c.toggle_led_yellow()
+    lcd_i2c.toggle_led_yellow()
     
     time.sleep(5)
