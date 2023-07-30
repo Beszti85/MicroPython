@@ -6,6 +6,10 @@ import digitalio
 import analogio
 import usb_midi
 import rotaryio
+import displayio
+import adafruit_ssd1322
+import busio
+
 import adafruit_midi
 from adafruit_midi.note_on          import NoteOn
 from adafruit_midi.note_off         import NoteOff
@@ -64,6 +68,15 @@ adcPitchBend = analogio.AnalogIn(board.GP27)
     
 led = digitalio.DigitalInOut(board.LED)
 led.direction = digitalio.Direction.OUTPUT # set the direction of the pin
+
+spi = busio.SPI(board.GP18, board.GP19)
+tft_cs = board.GP17
+tft_dc = board.GP16
+
+display_bus = displayio.FourWire(spi, command=tft_dc, chip_select=tft_cs,
+                                     baudrate=1000000)
+time.sleep(1)
+display = adafruit_ssd1322.SSD1322(display_bus, width=256, height=64, colstart=28)
 
 print("Hello")
 
