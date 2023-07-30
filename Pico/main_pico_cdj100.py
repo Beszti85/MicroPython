@@ -64,7 +64,7 @@ class PushButton:
 enc = rotaryio.IncrementalEncoder(board.GP10, board.GP11)
 last_position = None
 
-adcPitchBend = analogio.AnalogIn(board.GP27)  
+adcPitchBend = analogio.AnalogIn(board.GP28)  
     
 led = digitalio.DigitalInOut(board.LED)
 led.direction = digitalio.Direction.OUTPUT # set the direction of the pin
