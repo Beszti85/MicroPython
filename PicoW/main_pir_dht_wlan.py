@@ -6,6 +6,8 @@ import time
 import dht
 from ds1307 import DS1307
 from lcd_pcf8574 import I2cLcd
+from ssd1306 import SSD1306_I2C
+import framebuf
 
 sensor_dht11 = dht.DHT11(machine.Pin(2))
 #led_red = Pin(3, Pin.OUT)
@@ -22,6 +24,15 @@ lcd_pwm.duty_u16(50000)
 i2c_board  = I2C(0, scl = Pin(21), sda = Pin(20), freq = 100000)
 spi_board  = SPI(0, sck = Pin(18), mosi = Pin(19), miso = Pin(16), baudrate = 1000000)
 
+cs_ledDisp = Pin(22, Pin.OUT, Pin.PULL_UP)
+
+print(i2c_board.scan())
+
+oled = SSD1306_I2C(128, 32, i2c_board)
+
+oled.text("Hello Rasberry", 0, 0)
+oled.show()
+
 #result = i2c_board.scan()
 #print(result)
 #result = i2c_board.readfrom_mem(0x68, 0x00, 8)
@@ -37,7 +48,7 @@ print([hex(x) for x in rtcTime])
 timer = Timer()
 tim_buzzer = Timer()
 
-lcd_i2c = I2cLcd(i2c_board, 0x20)
+#lcd_i2c = I2cLcd(i2c_board, 0x20)
 
 def buzz_stop(tim_buzzer):
     buzz.value(0)
@@ -82,6 +93,8 @@ else:
     status = wlan.ifconfig()
     print( 'ip = ' + status[0] )
     
+buf = [0x0F, 0]
+    
 while True:
     sensor_dht11.measure()
     dht11_temp = (sensor_dht11.temperature())
@@ -93,9 +106,25 @@ while True:
     print("Internal tempreature: {}".format(adc_temperature))
     print("Temperature: {}".format(dht11_temp))
     print("Humidity: {}".format(dht11_hum))
-    int_val  = i2c_board.readfrom(0x20, 1)[0]
-    print(int_val)
-    print(i2c_board.readfrom(0x20, 1))
-    lcd_i2c.toggle_led_yellow()
+    oled.fill(0)
+    oled.text(rtc.PrintTime(), 0, 0)
+    oled.text("Temperature: {}".format(dht11_temp), 0, 10)
+    oled.text("Humidity: {}".format(dht11_hum), 0, 20)
+    oled.show()
+    #int_val  = i2c_board.readfrom(0x20, 1)[0]
+    #print(int_val)
+    #print(i2c_board.readfrom(0x20, 1))
+    #lcd_i2c.toggle_led_yellow()
+    buf[1] = 0x01
+    cs_ledDisp.value(0)
+    spi_board.write(bytearray(buf))
+    #spi_board.write('\x01')
+    cs_ledDisp.value(1)
     
-    time.sleep(5)
+    time.sleep(1)
+    buf[1] = 0
+    cs_ledDisp.value(0)
+    spi_board.write(bytearray(buf))
+    #spi_board.write('\x00')
+    cs_ledDisp.value(1)
+    time.sleep(4)
