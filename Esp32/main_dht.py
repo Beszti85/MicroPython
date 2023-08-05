@@ -26,6 +26,7 @@ while True:
     time.sleep(1)
     led_pin.value(0)
     print("Turning OFF the led...")
+    lcd_i2c.toggle_led_red()
     time.sleep(1)
     sensor_dht11.measure()
     dht11_temp = (sensor_dht11.temperature())
