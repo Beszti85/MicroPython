@@ -27,9 +27,15 @@ class I2cLcd(object):
         utime.sleep_ms(50)   # Allow LCD time to powerup
         # Send reset 3 times
         self.write_datapins(LCD_FUNCTION_RESET)
+        self.toggle_enable()
         utime.sleep_ms(6)    # Need to delay at least 4.1 msec
+        self.toggle_enable()
+        utime.sleep_ms(1)
+        self.toggle_enable()
+        utime.sleep_ms(1)
         # Put LCD into 4-bit mode
         self.write_datapins(0x20)
+        self.toggle_enable()
         utime.sleep_ms(1)
         
     def toggle_led_yellow(self):
@@ -55,12 +61,30 @@ class I2cLcd(object):
     def write_datapins(self, data):
         portVal = self.i2c.readfrom(self.i2c_addr, 1)[0]
         data &= DATA_MASK
-        print(portVal)
         self.i2c.writeto(self.i2c_addr, bytes([portVal]))
         
     def toggle_enable(self):
         portVal = self.i2c.readfrom(self.i2c_addr, 1)[0]
-        data &= ENA_MASK
-        print(portVal)
+        data |= ENA_MASK
         self.i2c.writeto(self.i2c_addr, bytes([portVal]))
+        data &= ~ENA_MASK
+        self.i2c.writeto(self.i2c_addr, bytes([portVal]))
+
+    # Set RS pin value
+    def write_rspin(self, data):
+        portVal = self.i2c.readfrom(self.i2c_addr, 1)[0]
+        if data is 1:
+            portVal |= RS_MASK
+        else:
+            data &= ~RS_MASK
+        self.i2c.writeto(self.i2c_addr, bytes([portVal]))
+
+    # Converts LCD char data to 4bit data
+    def write_LcdData(self, data, rs):
+        if rs is 1:
+            write_rspin(1)
+        else:
+            write_rspin(0)
+            
+        #Set data port value
 
