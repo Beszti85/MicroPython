@@ -65,9 +65,9 @@ class I2cLcd(object):
         
     def toggle_enable(self):
         portVal = self.i2c.readfrom(self.i2c_addr, 1)[0]
-        data |= ENA_MASK
+        portVal |= ENA_MASK
         self.i2c.writeto(self.i2c_addr, bytes([portVal]))
-        data &= ~ENA_MASK
+        portVal &= ~ENA_MASK
         self.i2c.writeto(self.i2c_addr, bytes([portVal]))
 
     # Set RS pin value
@@ -76,15 +76,40 @@ class I2cLcd(object):
         if data is 1:
             portVal |= RS_MASK
         else:
-            data &= ~RS_MASK
+            portVal &= ~RS_MASK
         self.i2c.writeto(self.i2c_addr, bytes([portVal]))
 
     # Converts LCD char data to 4bit data
     def write_LcdData(self, data, rs):
+        tempData = 0
         if rs is 1:
             write_rspin(1)
         else:
             write_rspin(0)
-            
-        #Set data port value
+        #Set data port value: High nibble   
+        if data & 0x80:
+            tempData |= (1 << PIN_D7)
+        if data & 0x40:
+            tempData |= (1 << PIN_D6)
+        if data & 0x20:
+            tempData |= (1 << PIN_D5)
+        if data & 0x10:
+            tempData |= (1 << PIN_D4)
+        #Write data pins
+        self.write_datapins(tempData)
+        self.toggle_enable()
+        #Set data port value: High nibble   
+        if data & 0x08:
+            tempData |= (1 << PIN_D7)
+        if data & 0x04:
+            tempData |= (1 << PIN_D6)
+        if data & 0x02:
+            tempData |= (1 << PIN_D5)
+        if data & 0x01:
+            tempData |= (1 << PIN_D4)
+        #Write data pins
+        self.write_datapins(tempData)
+        self.toggle_enable()
+        
+        utime.sleep_ms(1)
 
