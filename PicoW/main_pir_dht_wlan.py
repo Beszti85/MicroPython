@@ -8,6 +8,7 @@ from ds1307 import DS1307
 from lcd_pcf8574 import I2cLcd
 from ssd1306 import SSD1306_I2C
 import framebuf
+from nrf24l01 import NRF24L01
 
 sensor_dht11 = dht.DHT11(machine.Pin(2))
 #led_red = Pin(3, Pin.OUT)
@@ -92,7 +93,20 @@ else:
     print('connected')
     status = wlan.ifconfig()
     print( 'ip = ' + status[0] )
-    
+
+# pin definition for the Raspberry Pi Pico:
+myPins = {"spi": 0, "miso": 16, "mosi": 19, "sck": 18, "csn": 14, "ce": 15}
+# Addresses (little endian)
+pipes = (b"\xe1\xf0\xf0\xf0\xf0", b"\xd2\xf0\xf0\xf0\xf0")
+print("NRF24L01 transmitter")
+csn = Pin(myPins["csn"], mode=Pin.OUT, value=1)
+ce = Pin(myPins["ce"], mode=Pin.OUT, value=0)
+nrf = NRF24L01(SPI(myPins["spi"]), csn, ce, payload_size=8)
+nrf.open_tx_pipe(pipes[0])
+nrf.open_rx_pipe(1, pipes[1])
+nrf.start_listening()
+counter = 0  # Increase the value by 1 with each emission
+
 buf = [0x0F, 0]
     
 while True:
