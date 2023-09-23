@@ -18,7 +18,7 @@ pwm_lcd.freq(1000)
 pwm_lcd.duty(512)
 
 i2c_board = machine.I2C(sda = sda_pin, scl = scl_pin, freq = 100000)
-lcd_i2c = I2cLcd(i2c_board, 0x20)
+lcd_i2c = I2cLcd(i2c_board, 0x20, 4, 20)
 
 while True:
     led_pin.value(1)
