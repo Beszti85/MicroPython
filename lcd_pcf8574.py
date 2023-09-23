@@ -1,5 +1,6 @@
 import utime
 from machine import I2C
+from lcd_char import LcdChar
 
 PIN_D7 = 7
 PIN_D6 = 6
@@ -14,19 +15,18 @@ ENA_MASK  = 0x04
 RS_MASK   = 0x08
 LED_YELLOW_MASK = 0x02
 LED_RED_MASK    = 0x01
-LCD_FUNCTION_RESET = 0x30
 
 I2C_ADDR = 0x20
 
-class I2cLcd(object):
+class I2cLcd(LcdChar):
     
-    def __init__(self, i2c, i2c_addr):
+    def __init__(self, i2c, i2c_addr, num_lines, num_columns):
         self.i2c = i2c
         self.i2c_addr = i2c_addr
         self.i2c.writeto(self.i2c_addr, bytes([0]))
         utime.sleep_ms(50)   # Allow LCD time to powerup
         # Send reset 3 times
-        self.write_datapins(LCD_FUNCTION_RESET)
+        self.write_datapins(self.LCD_FUNCTION_RESET)
         self.toggle_enable()
         utime.sleep_ms(6)    # Need to delay at least 4.1 msec
         self.toggle_enable()
@@ -34,9 +34,11 @@ class I2cLcd(object):
         self.toggle_enable()
         utime.sleep_ms(1)
         # Put LCD into 4-bit mode
-        self.write_datapins(0x20)
+        self.write_datapins(self.LCD_FUNCTION)
         self.toggle_enable()
         utime.sleep_ms(1)
+        #initialize char lcd object
+        LcdChar.__init__(self, num_lines, num_columns)
         
     def toggle_led_yellow(self):
 
@@ -61,6 +63,8 @@ class I2cLcd(object):
     def write_datapins(self, data):
         portVal = self.i2c.readfrom(self.i2c_addr, 1)[0]
         data &= DATA_MASK
+        portVal &= 0x0F
+        portVal |= data
         self.i2c.writeto(self.i2c_addr, bytes([portVal]))
         
     def toggle_enable(self):
@@ -83,9 +87,9 @@ class I2cLcd(object):
     def write_LcdData(self, data, rs):
         tempData = 0
         if rs is 1:
-            write_rspin(1)
+            self.write_rspin(1)
         else:
-            write_rspin(0)
+            self.write_rspin(0)
         #Set data port value: High nibble   
         if data & 0x80:
             tempData |= (1 << PIN_D7)
@@ -98,7 +102,8 @@ class I2cLcd(object):
         #Write data pins
         self.write_datapins(tempData)
         self.toggle_enable()
-        #Set data port value: High nibble   
+        #Set data port value: High nibble
+        tempData = 0
         if data & 0x08:
             tempData |= (1 << PIN_D7)
         if data & 0x04:
