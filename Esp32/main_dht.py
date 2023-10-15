@@ -2,6 +2,8 @@
 import machine
 import time
 import dht
+import config
+import network
 from machine import Pin
 from lcd_pcf8574 import I2cLcd
 
@@ -21,6 +23,23 @@ i2c_board = machine.I2C(sda = sda_pin, scl = scl_pin, freq = 100000)
 lcd_i2c = I2cLcd(i2c_board, 0x20, 4, 20)
 
 lcd_i2c.putstrpos("Hello Python!", 1, 0)
+
+wlan = network.WLAN(network.STA_IF)
+wlan.active(True)
+wlan.connect(config.WIFI_SSID, config.WIFI_PWD)
+
+while not wlan.isconnected() and wlan.status() >= 0:
+    print("Waiting to connect:")
+time.sleep(1)
+
+print(wlan.ifconfig())
+# Handle connection error
+if wlan.status() != 3:
+    print('network connection failed')
+else:
+    print('connected')
+    status = wlan.ifconfig()
+    print( 'ip = ' + status[0] )
 
 while True:
     led_pin.value(1)
