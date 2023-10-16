@@ -6,6 +6,7 @@ import config
 import network
 from machine import Pin
 from lcd_pcf8574 import I2cLcd
+from hcsr04 import HCSR04
 
 print("Start")
 
@@ -19,6 +20,8 @@ pwm_lcd = machine.PWM(Pin(4))
 pwm_lcd.freq(1000)
 pwm_lcd.duty(512)
 
+sensor_US = HCSR04(trigger_pin=2, echo_pin=15, echo_timeout_us = 1000000)
+
 i2c_board = machine.I2C(sda = sda_pin, scl = scl_pin, freq = 100000)
 lcd_i2c = I2cLcd(i2c_board, 0x20, 4, 20)
 
@@ -28,18 +31,12 @@ wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
 wlan.connect(config.WIFI_SSID, config.WIFI_PWD)
 
-while not wlan.isconnected() and wlan.status() >= 0:
+while not wlan.isconnected():
     print("Waiting to connect:")
 time.sleep(1)
 
+print("Connected to network!")
 print(wlan.ifconfig())
-# Handle connection error
-if wlan.status() != 3:
-    print('network connection failed')
-else:
-    print('connected')
-    status = wlan.ifconfig()
-    print( 'ip = ' + status[0] )
 
 while True:
     led_pin.value(1)
@@ -58,3 +55,5 @@ while True:
     print(int_val)
     print(i2c_board.readfrom(0x20, 1))
     lcd_i2c.toggle_led_yellow()
+    distance = sensor_US.distance_cm()
+    print('Distance: ', distance, 'cm')
