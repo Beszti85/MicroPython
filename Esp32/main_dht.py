@@ -4,7 +4,7 @@ import time
 import dht
 import config
 import network
-from machine import Pin
+from machine import Pin, TouchPad
 from lcd_pcf8574 import I2cLcd
 from hcsr04 import HCSR04
 
@@ -12,6 +12,7 @@ print("Start")
 
 led_pin = Pin(2, Pin.OUT)
 sensor_dht11 = dht.DHT11(Pin(0))
+touch_sens   = TouchPad(Pin(12))
 #i2c display
 scl_pin = Pin(22)
 sda_pin = Pin(21)
@@ -51,9 +52,10 @@ while True:
     dht11_hum = (sensor_dht11.humidity())
     print("Temperature: {}".format(dht11_temp))
     print("Humidity: {}".format(dht11_hum))
+    print("Touch value: {}".format(touch_sens.read()))
     int_val  = i2c_board.readfrom(0x20, 1)[0]
-    print(int_val)
-    print(i2c_board.readfrom(0x20, 1))
+    #print(int_val)
+    #print(i2c_board.readfrom(0x20, 1))
     lcd_i2c.toggle_led_yellow()
     distance = sensor_US.distance_cm()
     print('Distance: ', distance, 'cm')
