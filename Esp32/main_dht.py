@@ -21,6 +21,8 @@ pwm_lcd = machine.PWM(Pin(4))
 pwm_lcd.freq(1000)
 pwm_lcd.duty(512)
 
+adc0 = machine.ADC(Pin(36))
+
 sensor_US = HCSR04(trigger_pin=2, echo_pin=15, echo_timeout_us = 1000000)
 
 i2c_board = machine.I2C(sda = sda_pin, scl = scl_pin, freq = 100000)
@@ -59,3 +61,4 @@ while True:
     lcd_i2c.toggle_led_yellow()
     distance = sensor_US.distance_cm()
     print('Distance: ', distance, 'cm')
+    print('ADC0 value = {}'.format(adc0.read()))
