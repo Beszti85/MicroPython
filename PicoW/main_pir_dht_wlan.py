@@ -1,4 +1,5 @@
 import machine
+import config
 from machine import Pin, Timer, ADC, I2C, SPI
 import network
 import utime
@@ -9,6 +10,7 @@ from lcd_pcf8574 import I2cLcd
 from ssd1306 import SSD1306_I2C
 import framebuf
 from nrf24l01 import NRF24L01
+import urequests
 
 sensor_dht11 = dht.DHT11(machine.Pin(2))
 #led_red = Pin(3, Pin.OUT)
@@ -67,7 +69,7 @@ sensor_temp = ADC(4)
 conversion_factor = 3.3 / (65535)
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
-wlan.connect('','')
+wlan.connect(config.WIFI_SSID, config.WIFI_PWD)
 
 def blink(timer):
     #led_red.toggle()
@@ -141,4 +143,9 @@ while True:
     spi_board.write(bytearray(buf))
     #spi_board.write('\x00')
     cs_ledDisp.value(1)
+    
+    dht_readings = {'field1':dht11_temp, 'field2':dht11_hum} 
+    request = urequests.post( 'http://api.thingspeak.com/update?api_key=' + config.WRITE_KEY, json = dht_readings, headers = config.HTTP_HEADERS )  
+    request.close() 
+    
     time.sleep(4)
