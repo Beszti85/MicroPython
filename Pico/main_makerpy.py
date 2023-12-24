@@ -1,4 +1,6 @@
 from machine import Pin, UART, I2C, SPI, ADC, Timer, PWM
+import os
+import sdcard
 from neopixel import NeoPixel
 import time
 import utime
@@ -25,6 +27,20 @@ np_cycle = 0
 # PWM channels for audio jack
 audio_left  = PWM(Pin(18))
 audio_right = PWM(Pin(19))
+# SD card
+sd_cs = Pin(15, Pin.OUT)
+sd_spi = SPI(1,
+             baudrate = 5000000,
+             polarity = 0,
+             phase = 0,
+             bits = 8,
+             firstbit = SPI.MSB,
+             sck = Pin(10),
+             mosi = Pin=(11),
+             miso = Pin(8))
+
+# Initialize SD card
+sd = sdcard.SDCard(sd_spi, sd_cs)
 
 # Short delay to stop I2C falling over
 time.sleep(1)
