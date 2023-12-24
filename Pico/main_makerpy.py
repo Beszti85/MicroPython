@@ -1,4 +1,4 @@
-from machine import Pin, UART, I2C, SPI, ADC, Timer
+from machine import Pin, UART, I2C, SPI, ADC, Timer, PWM
 from neopixel import NeoPixel
 import time
 import utime
@@ -22,6 +22,9 @@ i2c=I2C(1,sda=Pin(6), scl=Pin(7), freq=400000)
 # Timer for neopixel led
 np_timer = Timer()
 np_cycle = 0
+# PWM channels for audio jack
+audio_left  = PWM(Pin(18))
+audio_right = PWM(Pin(19))
 
 # Short delay to stop I2C falling over
 time.sleep(1)
