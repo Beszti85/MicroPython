@@ -9,6 +9,9 @@ import utime
 uart0 = UART(0, baudrate=115200, tx=Pin(16), rx=Pin(17))
 # LED on Pico board
 ledpin = Pin(25, Pin.OUT)
+# Chip temperature sensor
+sensor_temp = ADC(4)
+conversion_factor = 3.3 / (65535)
 # Pushbuttons
 button_gp20 = Pin(20, Pin.IN)
 button_gp21 = Pin(21, Pin.IN)
@@ -62,4 +65,6 @@ np_timer.init(mode=Timer.PERIODIC, period=2000, callback=np_change)
 
 while True:
     ledpin.toggle()
+    read_adctemp = sensor_temp.read_u16() * conversion_factor
+    adc_temperature = 27 - (read_adctemp - 0.706)/0.001721
     time.sleep_ms(500)
