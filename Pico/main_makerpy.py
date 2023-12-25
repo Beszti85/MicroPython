@@ -36,7 +36,7 @@ sd_spi = SPI(1,
              bits = 8,
              firstbit = SPI.MSB,
              sck = Pin(10),
-             mosi = Pin=(11),
+             mosi = Pin(11),
              miso = Pin(8))
 
 # Initialize SD card
