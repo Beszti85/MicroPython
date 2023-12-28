@@ -43,7 +43,7 @@ sd_spi = SPI(1,
              miso = Pin(8))
 
 # Initialize SD card
-sd = sdcard.SDCard(sd_spi, sd_cs)
+#sd = sdcard.SDCard(sd_spi, sd_cs)
 
 # Short delay to stop I2C falling over
 time.sleep(1)
@@ -63,8 +63,13 @@ def np_change(timer):
 
 np_timer.init(mode=Timer.PERIODIC, period=2000, callback=np_change)
 
+# Logfile for temperatures
+file = open("temps.txt", "w")
+
 while True:
     ledpin.toggle()
     read_adctemp = sensor_temp.read_u16() * conversion_factor
     adc_temperature = 27 - (read_adctemp - 0.706)/0.001721
+    file.write(str(adc_temperature) + "\n")
+    file.flush()
     time.sleep_ms(500)
