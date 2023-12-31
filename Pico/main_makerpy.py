@@ -4,6 +4,7 @@ import sdcard
 from neopixel import NeoPixel
 import time
 import utime
+from pushbutton import PushButton
 
 # ESP01 on UART0, GP16 and GP17
 uart0 = UART(0, baudrate=115200, tx=Pin(16), rx=Pin(17))
@@ -13,9 +14,15 @@ ledpin = Pin(25, Pin.OUT)
 sensor_temp = ADC(4)
 conversion_factor = 3.3 / (65535)
 # Pushbuttons
-button_gp20 = Pin(20, Pin.IN)
-button_gp21 = Pin(21, Pin.IN)
-button_gp22 = Pin(22, Pin.IN)
+pin_gp20 = Pin(20, Pin.IN, Pin.PULL_UP)
+pin_gp21 = Pin(21, Pin.IN, Pin.PULL_UP)
+pin_gp22 = Pin(22, Pin.IN, Pin.PULL_UP)
+button_gp20 = PushButton(0, 10, pin_gp20)
+button_gp21 = PushButton(0, 10, pin_gp21)
+button_gp22 = PushButton(0, 10, pin_gp22)
+# Timer to refresh button states
+button_timer = Timer()
+
 # Neopixel led: GP28
 pin_NP = Pin(28, Pin.OUT)
 led_np = NeoPixel(pin_NP, 1)
@@ -63,6 +70,13 @@ def np_change(timer):
 
 np_timer.init(mode=Timer.PERIODIC, period=2000, callback=np_change)
 
+def button_refresh(timer):
+    button_gp20.update(pin_gp20.value())
+    button_gp21.update(button_gp21.pin.value())
+    button_gp22.update(button_gp22.pin.value())
+
+button_timer.init(mode=Timer.PERIODIC, period=20, callback=button_refresh)
+
 # Logfile for temperatures
 file = open("temps.txt", "w")
 
@@ -70,6 +84,9 @@ while True:
     ledpin.toggle()
     read_adctemp = sensor_temp.read_u16() * conversion_factor
     adc_temperature = 27 - (read_adctemp - 0.706)/0.001721
+
+    if button_gp20.checkPushed() is True:
+        print("GP20 pressed")
     file.write(str(adc_temperature) + "\n")
     file.flush()
     time.sleep_ms(500)
