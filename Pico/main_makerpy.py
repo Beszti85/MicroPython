@@ -1,6 +1,7 @@
 from machine import Pin, UART, I2C, SPI, ADC, Timer, PWM
 import os
 import sdcard
+from ssd1306 import SSD1306_I2C
 from neopixel import NeoPixel
 import time
 import utime
@@ -13,13 +14,15 @@ ledpin = Pin(25, Pin.OUT)
 # Chip temperature sensor
 sensor_temp = ADC(4)
 conversion_factor = 3.3 / (65535)
+# Pico: ADC3 used for VSYS/3
+sensor_vsys3 = ADC(Pin(29))
 # Pushbuttons
 pin_gp20 = Pin(20, Pin.IN, Pin.PULL_UP)
 pin_gp21 = Pin(21, Pin.IN, Pin.PULL_UP)
 pin_gp22 = Pin(22, Pin.IN, Pin.PULL_UP)
-button_gp20 = PushButton(0, 10, pin_gp20)
-button_gp21 = PushButton(0, 10, pin_gp21)
-button_gp22 = PushButton(0, 10, pin_gp22)
+button_gp20 = PushButton(0, 5, pin_gp20)
+button_gp21 = PushButton(0, 5, pin_gp21)
+button_gp22 = PushButton(0, 5, pin_gp22)
 # Timer to refresh button states
 button_timer = Timer()
 
@@ -84,6 +87,8 @@ while True:
     ledpin.toggle()
     read_adctemp = sensor_temp.read_u16() * conversion_factor
     adc_temperature = 27 - (read_adctemp - 0.706)/0.001721
+    battery_voltage = 3 * 3.3 * sensor_vsys3.read_u16() / 65535
+    print(battery_voltage)
 
     if button_gp20.checkPushed() is True:
         print("GP20 pressed")
