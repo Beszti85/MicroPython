@@ -17,12 +17,9 @@ conversion_factor = 3.3 / (65535)
 # Pico: ADC3 used for VSYS/3
 sensor_vsys3 = ADC(Pin(29))
 # Pushbuttons
-pin_gp20 = Pin(20, Pin.IN, Pin.PULL_UP)
-pin_gp21 = Pin(21, Pin.IN, Pin.PULL_UP)
-pin_gp22 = Pin(22, Pin.IN, Pin.PULL_UP)
-button_gp20 = PushButton(0, 5, pin_gp20)
-button_gp21 = PushButton(0, 5, pin_gp21)
-button_gp22 = PushButton(0, 5, pin_gp22)
+button_gp20 = PushButton(0, 5, Pin(20, Pin.IN))
+button_gp21 = PushButton(0, 5, Pin(21, Pin.IN))
+button_gp22 = PushButton(0, 5, Pin(22, Pin.IN))
 # Timer to refresh button states
 button_timer = Timer()
 
@@ -50,7 +47,7 @@ sd_spi = SPI(1,
              firstbit = SPI.MSB,
              sck = Pin(10),
              mosi = Pin(11),
-             miso = Pin(8))
+             miso = Pin(12))
 
 # Initialize SD card
 #sd = sdcard.SDCard(sd_spi, sd_cs)
@@ -74,7 +71,7 @@ def np_change(timer):
 np_timer.init(mode=Timer.PERIODIC, period=2000, callback=np_change)
 
 def button_refresh(timer):
-    button_gp20.update(pin_gp20.value())
+    button_gp20.update(button_gp20.pin.value())
     button_gp21.update(button_gp21.pin.value())
     button_gp22.update(button_gp22.pin.value())
 
@@ -92,6 +89,10 @@ while True:
 
     if button_gp20.checkPushed() is True:
         print("GP20 pressed")
+    if button_gp21.checkPushed() is True:
+        print("GP21 pressed")
+    if button_gp22.checkPushed() is True:
+        print("GP22 pressed")
     file.write(str(adc_temperature) + "\n")
     file.flush()
     time.sleep_ms(500)
