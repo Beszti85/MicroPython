@@ -1,10 +1,11 @@
-# Write your code here :-)
+# Demo circuitpython project on MakerPico board
 import time
 import board
 from digitalio import DigitalInOut
 import busio as io
 import adafruit_ssd1306
 import adafruit_dht
+import analogio
 
 
 # Initialize OLED
@@ -17,6 +18,9 @@ oled = adafruit_ssd1306.SSD1306_I2C(128, 64, i2c)
 dht_pin = board.GP1
 dht_device = adafruit_dht.DHT11(dht_pin)
 
+# Initialize the light sensor
+photocell = analogio.AnalogIn(board.A1)
+
 # Program loop
 while True:
     # Clear all pixels
@@ -26,6 +30,7 @@ while True:
         # Read temperature and humidity
         temperature = dht_device.temperature
         humidity = dht_device.humidity
+        print(photocell.value)
         #temperature = 25
         #humidity = 10
 
@@ -43,3 +48,5 @@ while True:
 
     # Delay before the next reading
     time.sleep(2)
+
+
