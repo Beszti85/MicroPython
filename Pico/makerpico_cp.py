@@ -6,7 +6,14 @@ import busio as io
 import adafruit_ssd1306
 import adafruit_dht
 import analogio
+import sdcardio
+import storage
+from ds1307_cp import DS1307
 
+#sd = sdcardio.SDCard(board.SPI(), board.SD_CS)
+#vfs = storage.VfsFat(sd)
+#storage.mount(vfs, '/sd')
+#19os.listdir('/sd')
 
 # Initialize OLED
 # I2C: SCL = GP1, SDA = GP0
@@ -20,6 +27,10 @@ dht_device = adafruit_dht.DHT11(dht_pin)
 
 # Initialize the light sensor
 photocell = analogio.AnalogIn(board.A1)
+
+# Initialize DS1307 RTC
+rtc_clk = DS1307(i2c)
+#rtc_clk.PrintTime()
 
 # Program loop
 while True:
