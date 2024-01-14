@@ -7,6 +7,20 @@ import time
 import utime
 from pushbutton import PushButton
 
+def displ_test(disp):
+    disp.fill(0)
+    disp.fill_rect(0, 0, 32, 32, 1)
+    disp.fill_rect(2, 2, 28, 28, 0)
+    disp.vline(9, 8, 22, 1)
+    disp.vline(16, 2, 22, 1)
+    disp.vline(23, 8, 22, 1)
+    disp.fill_rect(26, 24, 2, 4, 1)
+    disp.text('MicroPython', 40, 0, 1)
+    disp.text('SSD1306', 40, 12, 1)
+    disp.text('OLED 128x64', 40, 24, 1)
+    disp.text('Next line code', 0, 36, 2)
+    disp.show()
+
 # ESP01 on UART0, GP16 and GP17
 uart0 = UART(0, baudrate=115200, tx=Pin(16), rx=Pin(17))
 # LED on Pico board
@@ -31,6 +45,9 @@ adc_0 = ADC(Pin(26))
 adc_1 = ADC(Pin(27))
 # I2C OLED Display
 i2c=I2C(1,sda=Pin(6), scl=Pin(7), freq=400000)
+print(i2c.scan())
+display = SSD1306_I2C(128, 64, i2c)
+displ_test(display)
 # Timer for neopixel led
 np_timer = Timer()
 np_cycle = 0
@@ -38,9 +55,9 @@ np_cycle = 0
 audio_left  = PWM(Pin(18))
 audio_right = PWM(Pin(19))
 # SD card
-sd_cs = Pin(15, Pin.OUT)
+sd_cs = Pin(15, Pin.OUT, value = 1)
 sd_spi = SPI(1,
-             baudrate = 5000000,
+             baudrate = 1000000,
              polarity = 0,
              phase = 0,
              bits = 8,
@@ -50,7 +67,11 @@ sd_spi = SPI(1,
              miso = Pin(12))
 
 # Initialize SD card
-#sd = sdcard.SDCard(sd_spi, sd_cs)
+#vosd = sdcard.SDCard(sd_spi, sd_cs)
+
+#Servo motor PWM test: Pin0
+pwm_servo = PWM(Pin(0))
+pwm_servo.freq(50)
 
 # Short delay to stop I2C falling over
 time.sleep(1)
@@ -80,6 +101,8 @@ button_timer.init(mode=Timer.PERIODIC, period=20, callback=button_refresh)
 # Logfile for temperatures
 file = open("temps.txt", "w")
 
+pwm_pulse = 0
+
 while True:
     ledpin.toggle()
     read_adctemp = sensor_temp.read_u16() * conversion_factor
@@ -88,11 +111,15 @@ while True:
     print(battery_voltage)
 
     if button_gp20.checkPushed() is True:
+        pwm_pulse += 10
         print("GP20 pressed")
     if button_gp21.checkPushed() is True:
+        pwm_pulse -= 10
         print("GP21 pressed")
     if button_gp22.checkPushed() is True:
         print("GP22 pressed")
+    print(pwm_pulse)
+    pwm_servo.duty_ns(pwm_pulse * 1000)
     file.write(str(adc_temperature) + "\n")
     file.flush()
     time.sleep_ms(500)
