@@ -3,6 +3,7 @@ import os
 import sdcard
 from ssd1306 import SSD1306_I2C
 from neopixel import NeoPixel
+from ds1307 import DS1307
 import time
 import utime
 from pushbutton import PushButton
@@ -48,6 +49,8 @@ i2c=I2C(1,sda=Pin(6), scl=Pin(7), freq=400000)
 print(i2c.scan())
 display = SSD1306_I2C(128, 64, i2c)
 displ_test(display)
+# DS1307 RTC
+rtc = DS1307(i2c)
 # Timer for neopixel led
 np_timer = Timer()
 np_cycle = 0
@@ -102,6 +105,7 @@ button_timer.init(mode=Timer.PERIODIC, period=20, callback=button_refresh)
 file = open("temps.txt", "w")
 
 pwm_pulse = 0
+sqw_val   = 0
 
 while True:
     ledpin.toggle()
@@ -115,10 +119,17 @@ while True:
         print("GP20 pressed")
     if button_gp21.checkPushed() is True:
         pwm_pulse -= 10
+        rtc.SquareWave(0, 0)
         print("GP21 pressed")
     if button_gp22.checkPushed() is True:
+        rtc.SquareWave(1, sqw_val)
+        if sqw_val < 3:
+            sqw_val += 1
+        else:
+            sqw_val = 0
         print("GP22 pressed")
     print(pwm_pulse)
+    print(rtc.PrintTime())
     pwm_servo.duty_ns(pwm_pulse * 1000)
     file.write(str(adc_temperature) + "\n")
     file.flush()
