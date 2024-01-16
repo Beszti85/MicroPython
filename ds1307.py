@@ -25,7 +25,10 @@ class DS1307(object):
         buf = [0]*7
         buf = self.i2c.readfrom_mem(self.addr, DATETIME_REG, 7)
         return f"{self._bcd2dec(buf[6]) + 2000}/{self._bcd2dec(buf[5])}/{self._bcd2dec(buf[4])}\n{self._bcd2dec(buf[2])}:{self._bcd2dec(buf[1])}:{self._bcd2dec(buf[0])}"
-        
+
+    def SquareWave(self, onoff, value):
+        reg = 0 | onoff << 4 | value
+        self.i2c.writeto_mem(self.addr, CONTROL_REG, bytearray([reg]))
         
     def DateTime(self, datetime = None):
         """Get or set datetime"""
