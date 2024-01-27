@@ -7,6 +7,7 @@ from ds1307 import DS1307
 import time
 import utime
 from pushbutton import PushButton
+import dht
 
 def displ_test(disp):
     disp.fill(0)
@@ -57,6 +58,8 @@ np_cycle = 0
 # PWM channels for audio jack
 audio_left  = PWM(Pin(18))
 audio_right = PWM(Pin(19))
+# DTH11 on GPIO1
+sensor_dht11 = dht.DHT11(Pin(1))
 # SD card
 sd_cs = Pin(15, Pin.OUT, value = 1)
 sd_spi = SPI(1,
@@ -112,8 +115,14 @@ while True:
     read_adctemp = sensor_temp.read_u16() * conversion_factor
     adc_temperature = 27 - (read_adctemp - 0.706)/0.001721
     battery_voltage = 3 * 3.3 * sensor_vsys3.read_u16() / 65535
-    print(f"Battery voltage: {battery_voltage}")
+    print(f"Battery voltage: {battery_voltage}V")
     print(f"Lightning value: {adc_1.read_u16()}")
+    sensor_dht11.measure()
+    dht11_temp = (sensor_dht11.temperature())
+    dht11_hum = (sensor_dht11.humidity())
+    print("Internal tempreature: {}C".format(adc_temperature))
+    print("Temperature: {}C".format(dht11_temp))
+    print("Humidity: {}%".format(dht11_hum))
 
     if button_gp20.checkPushed() is True:
         pwm_pulse += 10
