@@ -112,7 +112,8 @@ while True:
     read_adctemp = sensor_temp.read_u16() * conversion_factor
     adc_temperature = 27 - (read_adctemp - 0.706)/0.001721
     battery_voltage = 3 * 3.3 * sensor_vsys3.read_u16() / 65535
-    print(battery_voltage)
+    print(f"Battery voltage: {battery_voltage}")
+    print(f"Lightning value: {adc_1.read_u16()}")
 
     if button_gp20.checkPushed() is True:
         pwm_pulse += 10
