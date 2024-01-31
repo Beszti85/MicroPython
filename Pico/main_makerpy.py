@@ -6,6 +6,7 @@ from neopixel import NeoPixel
 from ds1307 import DS1307
 import time
 import utime
+import uos
 from pushbutton import PushButton
 import dht
 
@@ -73,7 +74,15 @@ sd_spi = SPI(1,
              miso = Pin(12))
 
 # Initialize SD card
-#vosd = sdcard.SDCard(sd_spi, sd_cs)
+sd = sdcard.SDCard(sd_spi, sd_cs)
+
+# Mount filesystem
+vfs = uos.VfsFat(sd)
+uos.mount(vfs, "/sd")
+
+# Create a file and write something to it
+with open("/sd/pico.txt", "w") as file:
+    file.write("1. Hello, world!\r\n")
 
 #Servo motor PWM test: Pin0
 pwm_servo = PWM(Pin(0))
