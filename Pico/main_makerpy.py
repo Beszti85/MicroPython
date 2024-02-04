@@ -114,7 +114,8 @@ def button_refresh(timer):
 button_timer.init(mode=Timer.PERIODIC, period=20, callback=button_refresh)
 
 # Logfile for temperatures
-file = open("temps.txt", "w")
+#file = open("temps.txt", "w")
+file = open("/sd/pico.txt", "w")
 
 pwm_pulse = 0
 sqw_val   = 0
@@ -150,6 +151,12 @@ while True:
     print(pwm_pulse)
     print(rtc.PrintTime())
     pwm_servo.duty_ns(pwm_pulse * 1000)
-    file.write(str(adc_temperature) + "\n")
+    # Write variables into SD card
+    file.write(f"Internal temperature: {adc_temperature}C\n")
+    file.write(f"Battery voltage: {battery_voltage}V\n")
+    file.write(f"Temperature: {dht11_temp}C\n")
+    file.write(f"Humidity: {dht11_hum}%\n")
+    file.write(f"Lightning value: {adc_1.read_u16()}")
+
     file.flush()
     time.sleep_ms(500)
