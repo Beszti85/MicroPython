@@ -152,11 +152,12 @@ while True:
     print(rtc.PrintTime())
     pwm_servo.duty_ns(pwm_pulse * 1000)
     # Write variables into SD card
+    file.write(f"------------------------------------------------\n")
     file.write(f"Internal temperature: {adc_temperature}C\n")
     file.write(f"Battery voltage: {battery_voltage}V\n")
     file.write(f"Temperature: {dht11_temp}C\n")
     file.write(f"Humidity: {dht11_hum}%\n")
-    file.write(f"Lightning value: {adc_1.read_u16()}")
+    file.write(f"Lightning value: {adc_1.read_u16()}\n")
 
     file.flush()
     time.sleep_ms(500)
