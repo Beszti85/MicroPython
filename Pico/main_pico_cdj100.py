@@ -61,6 +61,8 @@ class PushButton:
             self.was_pressed = False
         return retval
 
+print("Hello\n")
+
 enc = rotaryio.IncrementalEncoder(board.GP10, board.GP11)
 last_position = None
 
@@ -68,6 +70,10 @@ adcPitchBend = analogio.AnalogIn(board.GP28)
     
 led = digitalio.DigitalInOut(board.LED)
 led.direction = digitalio.Direction.OUTPUT # set the direction of the pin
+
+led.value = True
+
+displayio.release_displays()
 
 spi = busio.SPI(board.GP18, board.GP19)
 tft_cs = board.GP17
@@ -78,7 +84,10 @@ display_bus = displayio.FourWire(spi, command=tft_dc, chip_select=tft_cs,
 time.sleep(1)
 display = adafruit_ssd1322.SSD1322(display_bus, width=256, height=64, colstart=28)
 
-print("Hello")
+bitmap = displayio.Bitmap(256, 64, 1)
+
+print("After display init\n")
+print("After display test\n")
 
 midi = adafruit_midi.MIDI(midi_out=usb_midi.ports[1], out_channel=0)
 
