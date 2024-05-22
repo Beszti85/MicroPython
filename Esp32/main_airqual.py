@@ -2,8 +2,9 @@
 import machine
 import time
 import config
+from pushbutton import PushButton
 import network
-from machine import Pin, TouchPad
+from machine import Pin, TouchPad, Timer
 
 print("Start")
 
@@ -15,6 +16,12 @@ led_rgbGreen = Pin(26, Pin.OUT)
 led_rgbRed   = Pin(27, Pin.OUT)
 
 led_RGB = [led_rgbBlue, led_rgbGreen, led_rgbRed]
+
+# Pushbuttons
+button_gp34 = PushButton(0, 5, Pin(34, Pin.IN))
+button_gp39 = PushButton(0, 5, Pin(39, Pin.IN))
+# Timer to refresh button states
+button_timer = Timer(0)
 
 touch_sens   = TouchPad(Pin(12))
 #i2c bus - AHT21+ENS160
@@ -39,6 +46,13 @@ else:
 
   for device in devices:  
     print("Decimal address: ",device," | Hexa address: ",hex(device))
+
+#AHT21 seems not working on the module
+#buf = [0]
+#buf = i2c_board.readfrom_mem(0x38, 0, 1)
+
+time.sleep(10)
+
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
 wlan.connect(config.WIFI_SSID, config.WIFI_PWD)
@@ -50,9 +64,20 @@ time.sleep(1)
 print("Connected to network!")
 print(wlan.ifconfig())
 
+def button_refresh(timer):
+    button_gp34.update(button_gp34.pin.value())
+    button_gp39.update(button_gp39.pin.value())
+
+button_timer.init(mode=Timer.PERIODIC, period=20, callback=button_refresh)
+
 led_index = 0
 
 while True:
+    if button_gp34.checkPushed() is True:
+        print("GP34 pressed")
+    if button_gp39.checkPushed() is True:
+        print("GP39 pressed")
+        
     led_index = 0    
     led_pin.value(1)
     led_RGB[2].value(0)
