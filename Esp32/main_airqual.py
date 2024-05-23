@@ -28,8 +28,12 @@ touch_sens   = TouchPad(Pin(12))
 scl_pin = Pin(22)
 sda_pin = Pin(21)
 
+# Photoresistor on ADC0
 adc0 = machine.ADC(Pin(36))
 adc0.atten(machine.ADC.ATTN_11DB)
+# Input voltage on ADC5
+adc5 = machine.ADC(Pin(33))
+adc5.atten(machine.ADC.ATTN_11DB)
 
 i2c_board = machine.I2C(sda = sda_pin, scl = scl_pin, freq = 100000)
 spi_board = machine.SPI(2, 3000000)
@@ -97,3 +101,4 @@ while True:
     #print(int_val)
     #print(i2c_board.readfrom(0x20, 1))
     print('ADC0 value = {}'.format(adc0.read()))
+    print('ADC5 value = {}'.format(adc5.read()))
