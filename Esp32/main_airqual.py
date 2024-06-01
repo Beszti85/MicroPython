@@ -72,7 +72,29 @@ def button_refresh(timer):
     button_gp34.update(button_gp34.pin.value())
     button_gp39.update(button_gp39.pin.value())
 
-button_timer.init(mode=Timer.PERIODIC, period=20, callback=button_refresh)
+button_timer.init(mode = Timer.PERIODIC, period=20, callback = button_refresh)
+
+led_rgb_index = 0
+
+def led_rgb_refresh(timer):
+    
+    if led_rgb_refresh is 0:
+        led_RGB[0].value(1)
+        led_RGB[1].value(0)
+        led_RGB[2].value(0)
+        led_rgb_index = 1
+    elif led_rgb_refresh is 1:
+        led_RGB[0].value(0)
+        led_RGB[1].value(1)
+        led_RGB[2].value(0)
+        led_rgb_index = 2
+    elif led_rgb_refresh is 2:
+        led_RGB[0].value(0)
+        led_RGB[1].value(0)
+        led_RGB[2].value(1)
+        led_rgb_index = 0
+
+led_rgb_timer.init(mode = Timer.PERIODIC, period=1000, callback = led_rgb_refresh)
 
 led_index = 0
 
@@ -84,8 +106,7 @@ while True:
         
     led_index = 0    
     led_pin.value(1)
-    led_RGB[2].value(0)
-    led_RGB[0].value(1)
+
     print("Turning ON the led...")
     time.sleep(1)
     led_RGB[0].value(0)
