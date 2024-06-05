@@ -21,7 +21,8 @@ led_RGB = [led_rgbBlue, led_rgbGreen, led_rgbRed]
 button_gp34 = PushButton(0, 5, Pin(34, Pin.IN))
 button_gp39 = PushButton(0, 5, Pin(39, Pin.IN))
 # Timer to refresh button states
-button_timer = Timer(0)
+button_timer  = Timer(0)
+led_rgb_timer = Timer(1)
 
 touch_sens   = TouchPad(Pin(12))
 #i2c bus - AHT21+ENS160
@@ -77,21 +78,25 @@ button_timer.init(mode = Timer.PERIODIC, period=20, callback = button_refresh)
 led_rgb_index = 0
 
 def led_rgb_refresh(timer):
+    global led_rgb_index
     
-    if led_rgb_refresh is 0:
+    if led_rgb_index is 0:
         led_RGB[0].value(1)
         led_RGB[1].value(0)
         led_RGB[2].value(0)
+        print("Led timer: value = ", led_rgb_index)
         led_rgb_index = 1
-    elif led_rgb_refresh is 1:
+    elif led_rgb_index is 1:
         led_RGB[0].value(0)
         led_RGB[1].value(1)
         led_RGB[2].value(0)
+        print("Led timer: value = ", led_rgb_index)
         led_rgb_index = 2
-    elif led_rgb_refresh is 2:
+    elif led_rgb_index is 2:
         led_RGB[0].value(0)
         led_RGB[1].value(0)
         led_RGB[2].value(1)
+        print("Led timer: value = ", led_rgb_index)
         led_rgb_index = 0
 
 led_rgb_timer.init(mode = Timer.PERIODIC, period=1000, callback = led_rgb_refresh)
@@ -109,13 +114,8 @@ while True:
 
     print("Turning ON the led...")
     time.sleep(1)
-    led_RGB[0].value(0)
-    led_RGB[1].value(1)
     led_pin.value(0)
     print("Turning OFF the led...")
-    time.sleep(1)
-    led_RGB[1].value(0)
-    led_RGB[2].value(1)
     time.sleep(1)
     print("Touch value: {}".format(touch_sens.read()))
     #int_val  = i2c_board.readfrom(0x20, 1)[0]
