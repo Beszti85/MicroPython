@@ -9,6 +9,7 @@ import utime
 import uos
 from pushbutton import PushButton
 import dht
+import bme280
 
 def displ_test(disp):
     disp.fill(0)
@@ -53,6 +54,8 @@ display = SSD1306_I2C(128, 64, i2c)
 displ_test(display)
 # DS1307 RTC
 rtc = DS1307(i2c)
+#BME280
+bme = bme280.BME280(i2c=i2c)
 # Timer for neopixel led
 np_timer = Timer()
 np_cycle = 0
@@ -149,6 +152,7 @@ while True:
             sqw_val = 0
         print("GP22 pressed")
     print(pwm_pulse)
+    print(bme.values)
     print(rtc.PrintTime())
     pwm_servo.duty_ns(pwm_pulse * 1000)
     # Write variables into SD card
