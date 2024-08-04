@@ -13,6 +13,7 @@ from nrf24l01 import NRF24L01
 import urequests
 
 sensor_dht11 = dht.DHT11(machine.Pin(2))
+sensor_mq135 = ADC(27)
 #led_red = Pin(3, Pin.OUT)
 led = machine.PWM(machine.Pin(3))
 led.freq(1000)
@@ -113,6 +114,7 @@ buf = [0x0F, 0]
     
 while True:
     sensor_dht11.measure()
+    mq135_value = sensor_mq135.read_u16()
     dht11_temp = (sensor_dht11.temperature())
     dht11_hum = (sensor_dht11.humidity())
     read_adctemp = sensor_temp.read_u16() * conversion_factor
@@ -122,6 +124,7 @@ while True:
     print("Internal tempreature: {}".format(adc_temperature))
     print("Temperature: {}".format(dht11_temp))
     print("Humidity: {}".format(dht11_hum))
+    print("Gas_value = {}".format(mq135_value))
     oled.fill(0)
     oled.text(rtc.PrintTime(), 0, 0)
     oled.text("Temperature: {}".format(dht11_temp), 0, 10)
