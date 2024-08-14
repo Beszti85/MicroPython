@@ -5,6 +5,7 @@ import config
 from pushbutton import PushButton
 import network
 from machine import Pin, TouchPad, Timer
+import aht
 
 print("Start")
 
@@ -52,11 +53,10 @@ else:
   for device in devices:  
     print("Decimal address: ",device," | Hexa address: ",hex(device))
 
-#AHT21 seems not working on the module
-#buf = [0]
-#buf = i2c_board.readfrom_mem(0x38, 0, 1)
-
 time.sleep(10)
+
+#Setup AHT21
+sensor_aht21 = aht.AHT2x(i2c_board, crc=True)
 
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
@@ -111,6 +111,10 @@ while True:
         
     led_index = 0    
     led_pin.value(1)
+
+    if sensor_aht21.is_ready:
+        print("Humidity: {:.2f}".format(sensor_aht21.humidity))
+        print("Temperature: {:.2f}".format(sensor_aht21.temperature))
 
     print("Turning ON the led...")
     time.sleep(1)
