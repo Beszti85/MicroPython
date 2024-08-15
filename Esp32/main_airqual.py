@@ -37,7 +37,7 @@ adc0.atten(machine.ADC.ATTN_11DB)
 adc5 = machine.ADC(Pin(33))
 adc5.atten(machine.ADC.ATTN_11DB)
 
-i2c_board = machine.I2C(sda = sda_pin, scl = scl_pin, freq = 100000)
+i2c_board = machine.I2C(sda = sda_pin, scl = scl_pin, freq = 200000)
 spi_board = machine.SPI(2, 3000000)
 
 time.sleep(2)
@@ -56,7 +56,7 @@ else:
 time.sleep(10)
 
 #Setup AHT21
-sensor_aht21 = aht.AHT2x(i2c_board, crc=True)
+sensor_aht21 = aht.AHT2x(i2c_board, crc=False)
 
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
