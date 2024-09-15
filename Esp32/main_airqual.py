@@ -6,6 +6,8 @@ from pushbutton import PushButton
 import network
 from machine import Pin, TouchPad, Timer
 import aht
+from ssd1306 import SSD1306_SPI
+import framebuf
 
 print("Start")
 
@@ -57,6 +59,17 @@ time.sleep(10)
 
 #Setup AHT21
 sensor_aht21 = aht.AHT2x(i2c_board, crc=False)
+
+#display pins
+cs = Pin(16)
+rst = Pin(0)
+dc = Pin(4)
+
+#display init
+oled = SSD1306_SPI(128, 64, spi_board, dc, rst, cs)
+
+oled.text("Hello Rasberry", 0, 0)
+oled.show()
 
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
