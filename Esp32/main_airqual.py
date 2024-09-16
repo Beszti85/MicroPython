@@ -55,7 +55,7 @@ else:
   for device in devices:  
     print("Decimal address: ",device," | Hexa address: ",hex(device))
 
-time.sleep(10)
+time.sleep(5)
 
 #Setup AHT21
 sensor_aht21 = aht.AHT2x(i2c_board, crc=False)
@@ -128,6 +128,10 @@ while True:
     if sensor_aht21.is_ready:
         print("Humidity: {:.2f}".format(sensor_aht21.humidity))
         print("Temperature: {:.2f}".format(sensor_aht21.temperature))
+        oled.fill(0)
+        oled.text("Temperature: {}".format(sensor_aht21.temperature), 0, 10)
+        oled.text("Humidity: {}".format(sensor_aht21.humidity), 0, 20)
+        oled.show()
 
     print("Turning ON the led...")
     time.sleep(1)
