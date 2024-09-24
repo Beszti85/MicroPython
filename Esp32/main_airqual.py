@@ -119,8 +119,15 @@ led_index = 0
 while True:
     if button_gp34.checkPushed() is True:
         print("GP34 pressed")
+        #stop the RGB led timer
+        led_rgb_timer.deinit()
+        led_RGB[0].value(0)
+        led_RGB[1].value(0)
+        led_RGB[2].value(0)
     if button_gp39.checkPushed() is True:
         print("GP39 pressed")
+        #start the timer if not running
+        led_rgb_timer.init(mode = Timer.PERIODIC, period=1000, callback = led_rgb_refresh)
         
     led_index = 0    
     led_pin.value(1)
