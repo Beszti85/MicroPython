@@ -14,6 +14,7 @@ from simple import MQTTClient
 print("Start")
 
 client_id = ubinascii.hexlify(machine.unique_id())
+client_idhex = machine.unique_id()
 
 # on board blue led
 led_pin = Pin(2, Pin.OUT)
@@ -117,7 +118,7 @@ def led_rgb_refresh(timer):
         led_rgb_index = 0
 
 topic_sub = b'notification'
-topic_pub = b'hello'
+topic_pub = b'domoticz/in'
 
 last_message = 0
 message_interval = 5
@@ -190,7 +191,9 @@ while True:
     try:
         client.check_msg()
         if (time.time() - last_message) > message_interval:
-            msg = b'Hello #%d' % counter
+            msg = f'{{"command":"udevice", "idx":7, "svalue":"{round(sensor_aht21.temperature, 2)};{round(sensor_aht21.humidity, 2)}"}}'.encode('utf-8')
+            #msg = f'{{"command":"udevice", "idx":5, "nvalue": "0", "svalue":"{round(sensor_aht21.temperature, 2)};{round(sensor_aht21.humidity, 2)}"}}'.encode('utf-8')
+            #msg = f'{"idx": 5, "nvalue": 0, "svalue":"{sensor_aht21.temperature}"}'.encode('utf-8')
             client.publish(topic_pub, msg)
             last_message = time.time()
             counter += 1
