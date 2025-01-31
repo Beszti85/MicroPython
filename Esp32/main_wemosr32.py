@@ -4,8 +4,25 @@ import network
 import ubinascii
 from simple import MQTTClient
 import time
+import bme280
 
 led_board = machine.Pin(2, machine.Pin.OUT)
+#i2c bus - BME280 and EEPROM AA24LC256
+scl_pin = machine.Pin(22)
+sda_pin = machine.Pin(21)
+i2c_board = machine.I2C(sda = sda_pin, scl = scl_pin, freq = 200000)
+#BME280
+bme = bme280.BME280(i2c=i2c_board)
+
+time.sleep(2)
+
+print('Scan i2c bus...')
+devices = i2c_board.scan()
+
+if len(devices) == 0:
+  print("No i2c device !")
+else:
+  print('i2c devices found:',len(devices))
 
 client_id = ubinascii.hexlify(machine.unique_id())
 client_idhex = machine.unique_id()
@@ -52,11 +69,12 @@ except OSError as e:
     restart_and_reconnect()
 
 while True:
-    
+    #print(bme280_values)
+    print(bme.values)
     try:
         client.check_msg()
         if (time.time() - last_message) > message_interval:
-            msg = f'{{"command":"udevice", "idx":8, "svalue":"{5};{6}"}}'.encode('utf-8')
+            msg = f'{{"command":"udevice", "idx":10, "svalue":"{bme.values_mqtt[0]};{bme.values_mqtt[2]};0;{bme.values_mqtt[1]}"}}'.encode('utf-8')
             client.publish(topic_pub, msg)
             last_message = time.time()
             counter += 1
@@ -66,4 +84,4 @@ while True:
     led_board.value(1)
     time.sleep(1)
     led_board.value(0)
-    time.sleep(1)
+    time.sleep(5)
