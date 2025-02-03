@@ -74,7 +74,10 @@ while True:
     try:
         client.check_msg()
         if (time.time() - last_message) > message_interval:
-            msg = f'{{"command":"udevice", "idx":10, "svalue":"{bme.values_mqtt[0]};{bme.values_mqtt[2]};0;{bme.values_mqtt[1]}"}}'.encode('utf-8')
+            #msg = f'{{"command":"udevice", "idx":10, "svalue":"{bme.values_mqtt[0]};{bme.values_mqtt[2]};0;{bme.values_mqtt[1]}"}}'.encode('utf-8')
+            msg = f'{{"command":"udevice", "idx":12, "svalue":"{bme.values_mqtt[0]};{bme.values_mqtt[2]}"}}'.encode('utf-8')
+            client.publish(topic_pub, msg)
+            msg = f'{{"command":"udevice", "idx":11, "svalue":"{bme.values_mqtt[1]}"}}'.encode('utf-8')
             client.publish(topic_pub, msg)
             last_message = time.time()
             counter += 1
