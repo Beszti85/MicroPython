@@ -10,7 +10,7 @@ from lcd_pcf8574 import I2cLcd
 from ssd1306 import SSD1306_I2C
 import framebuf
 from nrf24l01 import NRF24L01
-import urequests
+from simple import MQTTClient
 
 sensor_dht11 = dht.DHT11(machine.Pin(2))
 sensor_mq135 = ADC(27)
@@ -111,7 +111,39 @@ nrf.start_listening()
 counter = 0  # Increase the value by 1 with each emission
 
 buf = [0x0F, 0]
-    
+
+topic_sub = b'notification'
+topic_pub = b'domoticz/in'
+
+last_message = 0
+message_interval = 5
+counter = 0
+
+def sub_cb(topic, msg):
+    pass
+    #print((topic, msg))
+    #if topic == b'notification' and msg == b'received':
+        #print('ESP received hello message')
+
+def connect_and_subscribe():
+    global client_id, mqtt_server, topic_sub
+    client = MQTTClient(client_id, config.mqtt_server, user=config.mqtt_user, password=config.mqtt_pass)
+    client.set_callback(sub_cb)
+    client.connect()
+    client.subscribe(topic_sub)
+    #print('Connected to %s MQTT broker, subscribed to %s topic' % (config.mqtt_server, topic_sub))
+    return client
+
+def restart_and_reconnect():
+    #print('Failed to connect to MQTT broker. Reconnecting...')
+    time.sleep(10)
+    machine.reset()
+
+try:
+    client = connect_and_subscribe()
+except OSError as e:
+    restart_and_reconnect()
+
 while True:
     sensor_dht11.measure()
     mq135_value = sensor_mq135.read_u16()
@@ -147,8 +179,15 @@ while True:
     #spi_board.write('\x00')
     cs_ledDisp.value(1)
     
-    dht_readings = {'field1':dht11_temp, 'field2':dht11_hum} 
-    request = urequests.post( 'http://api.thingspeak.com/update?api_key=' + config.WRITE_KEY, json = dht_readings, headers = config.HTTP_HEADERS )  
-    request.close() 
-    
+    try:
+        client.check_msg()
+        if (time.time() - last_message) > message_interval:
+            #msg = f'{{"command":"udevice", "idx":10, "svalue":"{bme.values_mqtt[0]};{bme.values_mqtt[2]};0;{bme.values_mqtt[1]}"}}'.encode('utf-8')
+            msg = f'{{"command":"udevice", "idx":12, "svalue":"{dht11_temp};{dht11_hum}"}}'.encode('utf-8')
+            client.publish(topic_pub, msg)
+            last_message = time.time()
+            counter += 1
+    except OSError as e:
+        restart_and_reconnect()
+
     time.sleep(4)
