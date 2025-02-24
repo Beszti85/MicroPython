@@ -30,7 +30,16 @@ spi_board  = SPI(0, sck = Pin(18), mosi = Pin(19), miso = Pin(16), baudrate = 10
 
 cs_ledDisp = Pin(22, Pin.OUT, Pin.PULL_UP)
 
-print(i2c_board.scan())
+print('Scan i2c bus...')
+devices = i2c_board.scan()
+
+if len(devices) == 0:
+  print("No i2c device !")
+else:
+  print('i2c devices found:',len(devices))
+
+  for device in devices:  
+    print("Decimal address: ",device," | Hexa address: ",hex(device))
 
 oled = SSD1306_I2C(128, 32, i2c_board)
 
@@ -126,8 +135,7 @@ def sub_cb(topic, msg):
         #print('ESP received hello message')
 
 def connect_and_subscribe():
-    global client_id, mqtt_server, topic_sub
-    client = MQTTClient(client_id, config.mqtt_server, user=config.mqtt_user, password=config.mqtt_pass)
+    client = MQTTClient(config.client_id, config.mqtt_server, user=config.mqtt_user, password=config.mqtt_pass)
     client.set_callback(sub_cb)
     client.connect()
     client.subscribe(topic_sub)
@@ -183,7 +191,7 @@ while True:
         client.check_msg()
         if (time.time() - last_message) > message_interval:
             #msg = f'{{"command":"udevice", "idx":10, "svalue":"{bme.values_mqtt[0]};{bme.values_mqtt[2]};0;{bme.values_mqtt[1]}"}}'.encode('utf-8')
-            msg = f'{{"command":"udevice", "idx":12, "svalue":"{dht11_temp};{dht11_hum}"}}'.encode('utf-8')
+            msg = f'{{"command":"udevice", "idx":13, "svalue":"{dht11_temp};{dht11_hum}"}}'.encode('utf-8')
             client.publish(topic_pub, msg)
             last_message = time.time()
             counter += 1
