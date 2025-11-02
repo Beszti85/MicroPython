@@ -4,7 +4,7 @@ import time
 import config
 from pushbutton import PushButton
 import network
-from machine import Pin, Timer
+from machine import Pin, Timer, ADC
 import bme280
 
 print("Start")
@@ -18,9 +18,6 @@ led_rgbRed   = Pin(27, Pin.OUT)
 
 led_RGB = [led_rgbBlue, led_rgbGreen, led_rgbRed]
 
-# Pushbuttons
-button_gp34 = PushButton(0, 5, Pin(34, Pin.IN))
-button_gp39 = PushButton(0, 5, Pin(39, Pin.IN))
 # Timer to refresh button states
 button_timer  = Timer(0)
 led_rgb_timer = Timer(1)
@@ -29,12 +26,11 @@ led_rgb_timer = Timer(1)
 scl_pin = Pin(22)
 sda_pin = Pin(21)
 
-# Photoresistor on ADC0
-adc0 = machine.ADC(Pin(36))
-adc0.atten(machine.ADC.ATTN_11DB)
-# Input voltage on ADC5
-adc5 = machine.ADC(Pin(33))
-adc5.atten(machine.ADC.ATTN_11DB)
+#ADC channels
+adc17 = ADC(Pin(35), atten = ADC.ATTN_11DB)
+adc16 = ADC(Pin(34), atten = ADC.ATTN_11DB)
+adc10 = ADC(Pin(36), atten = ADC.ATTN_11DB)
+adc13 = ADC(Pin(39), atten = ADC.ATTN_11DB)
 
 i2c_board = machine.I2C(sda = sda_pin, scl = scl_pin, freq = 200000)
 spi_board = machine.SPI(2, 3000000)
@@ -67,12 +63,6 @@ time.sleep(1)
 print("Connected to network!")
 print(wlan.ifconfig())
 
-def button_refresh(timer):
-    button_gp34.update(button_gp34.pin.value())
-    button_gp39.update(button_gp39.pin.value())
-
-button_timer.init(mode = Timer.PERIODIC, period=20, callback = button_refresh)
-
 led_rgb_index = 0
 
 def led_rgb_refresh(timer):
@@ -102,18 +92,7 @@ led_rgb_timer.init(mode = Timer.PERIODIC, period=1000, callback = led_rgb_refres
 led_index = 0
 
 while True:
-    if button_gp34.checkPushed() is True:
-        print("GP34 pressed")
-        #stop the RGB led timer
-        led_rgb_timer.deinit()
-        led_RGB[0].value(0)
-        led_RGB[1].value(0)
-        led_RGB[2].value(0)
-    if button_gp39.checkPushed() is True:
-        print("GP39 pressed")
-        #start the timer if not running
-        led_rgb_timer.init(mode = Timer.PERIODIC, period=1000, callback = led_rgb_refresh)
-        
+       
     led_index = 0    
     led_pin.value(1)
 
@@ -126,6 +105,6 @@ while True:
     #int_val  = i2c_board.readfrom(0x20, 1)[0]
     #print(int_val) 
     #print(i2c_board.readfrom(0x20, 1))
-    print('ADC0 value = {}'.format(adc0.read()))
-    print('ADC5 value = {}'.format(adc5.read()))
+    #print('ADC0 value = {}'.format(adc0.read()))
+    #print('ADC5 value = {}'.format(adc5.read()))
     
