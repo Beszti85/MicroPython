@@ -2,7 +2,7 @@
 import machine
 import time
 import config
-from pushbutton import PushButton
+#from pushbutton import PushButton
 import network
 from machine import Pin, Timer, ADC
 import bme280
@@ -105,6 +105,8 @@ while True:
     #int_val  = i2c_board.readfrom(0x20, 1)[0]
     #print(int_val) 
     #print(i2c_board.readfrom(0x20, 1))
-    #print('ADC0 value = {}'.format(adc0.read()))
-    #print('ADC5 value = {}'.format(adc5.read()))
+    print('ADC17 value = {}'.format(adc17.read_uv() / 1000000))
+    print('ADC16 value = {}'.format(adc16.read_uv() / 1000000))
+    print('ADC10 value = {}'.format(adc10.read_uv() / 1000000))
+    print('ADC13 value = {}'.format(adc13.read_uv() / 1000000))
     
