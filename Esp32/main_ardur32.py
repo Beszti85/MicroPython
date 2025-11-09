@@ -6,6 +6,7 @@ import config
 import network
 from machine import Pin, Timer, ADC
 import bme280
+from ds1307 import DS1307
 
 print("Start")
 
@@ -48,6 +49,8 @@ else:
   for device in devices:  
     print("Decimal address: ",device," | Hexa address: ",hex(device))
 
+# DS1307 RTC
+rtc = DS1307(i2c_board)
 #BME280
 bme = bme280.BME280(i2c=i2c_board)
 time.sleep(5)
@@ -102,6 +105,7 @@ while True:
     print("Turning OFF the led...")
     time.sleep(1)
     print(bme.values)
+    print(rtc.PrintTime())
     #int_val  = i2c_board.readfrom(0x20, 1)[0]
     #print(int_val) 
     #print(i2c_board.readfrom(0x20, 1))
