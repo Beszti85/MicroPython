@@ -12,10 +12,13 @@ from pushbutton import PushButton
 from neopixel import NeoPixel
 import asyncio
 
+# Task debug pins
+pin_dbg_1sec = Pin(0, Pin.OUT)
+pin_dbg_5sec = Pin(1, Pin.OUT)
 led_dbg = Pin(16, Pin.OUT)
 # Neopixel led: GP18, 2 leds
-pin_NP = Pin(28, Pin.OUT)
-led_np = NeoPixel(pin_NP, 2)
+pin_NP = Pin(18, Pin.OUT)
+leds_np = NeoPixel(pin_NP, 2)
 #servo pins
 servo12 = PWM(Pin(12))
 servo13 = PWM(Pin(13))
@@ -65,8 +68,30 @@ def button_refresh(timer):
 
 button_timer.init(mode=Timer.PERIODIC, period=20, callback=button_refresh)
 
+neopixel_counter = 0
+
+def refresh_rgb_leds(leds_np):
+    global neopixel_counter
+    neopixel_counter += 1
+    if neopixel_counter > 255:
+        neopixel_counter = 0
+    leds_np[0] = (neopixel_counter, 0, 255 - neopixel_counter)
+    leds_np[1] = (255 - neopixel_counter, neopixel_counter, 0)
+    leds_np.write()
+
 async def Task1sec():
     while True:
+        # Set debug pin
+        pin_dbg_1sec.value(1)
+        refresh_rgb_leds(leds_np)
+        # Clear debug pin
+        pin_dbg_1sec.value(0)
+        await asyncio.sleep(1)
+
+async def Task5sec():
+    while True:
+        pin_dbg_5sec.value(1)
+        print("5 seconds task")
         #read battery voltage
         battery_voltage = 2 * 3.3 * adc_bat.read_u16() / 65535
         # Read internal temperature sensor
@@ -74,13 +99,7 @@ async def Task1sec():
         adc_temperature = 27 - (read_adctemp - 0.706)/0.001721
         print(f"Battery voltage: {battery_voltage}V")
         print("Internal tempreature: {}C".format(adc_temperature))
-        # Put here code to be executed every 1 second
-        await asyncio.sleep(1)
-
-async def Task5sec():
-    while True:
-        # Put here code to be executed every 5 seconds
-        print("5 seconds task")
+        pin_dbg_5sec.value(0)
         await asyncio.sleep(5)
 
 async def main():
