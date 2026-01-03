@@ -10,6 +10,7 @@ import uos
 from pushbutton import PushButton
 import dht
 import bme280
+from hcsr04 import HCSR04
 
 def displ_test(disp):
     disp.fill(0)
@@ -49,7 +50,11 @@ adc_0 = ADC(Pin(26))
 adc_1 = ADC(Pin(27))
 # I2C OLED Display
 i2c=I2C(1,sda=Pin(6), scl=Pin(7), freq=400000)
-print(i2c.scan())
+devices = i2c.scan()
+if len(devices) == 0:
+  print("No i2c device !")
+else:
+  print('i2c devices found:', devices)
 display = SSD1306_I2C(128, 64, i2c)
 displ_test(display)
 # DS1307 RTC
@@ -62,8 +67,6 @@ np_cycle = 0
 # PWM channels for audio jack
 audio_left  = PWM(Pin(18))
 audio_right = PWM(Pin(19))
-# DTH11 on GPIO1
-sensor_dht11 = dht.DHT11(Pin(1))
 # SD card
 sd_cs = Pin(15, Pin.OUT, value = 1)
 sd_spi = SPI(1,
@@ -86,6 +89,8 @@ uos.mount(vfs, "/sd")
 # Create a file and write something to it
 with open("/sd/pico.txt", "w") as file:
     file.write("1. Hello, world!\r\n")
+
+sensor_us = HCSR04(trigger_pin=2, echo_pin=3, echo_timeout_us=30000)
 
 #Servo motor PWM test: Pin0
 pwm_servo = PWM(Pin(0))
@@ -128,6 +133,8 @@ while True:
     read_adctemp = sensor_temp.read_u16() * conversion_factor
     adc_temperature = 27 - (read_adctemp - 0.706)/0.001721
     battery_voltage = 3 * 3.3 * sensor_vsys3.read_u16() / 65535
+    distance = sensor_us.distance_cm()
+    print('Distance:', distance, 'cm')
     print(f"Battery voltage: {battery_voltage}V")
     print(f"Lightning value: {adc_1.read_u16()}")
     sensor_dht11.measure()
