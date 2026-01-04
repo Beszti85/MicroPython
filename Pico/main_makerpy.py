@@ -6,11 +6,10 @@ from neopixel import NeoPixel
 from ds1307 import DS1307
 import time
 import utime
-import uos
 from pushbutton import PushButton
-import dht
 import bme280
 from hcsr04 import HCSR04
+import asyncio
 
 def displ_test(disp):
     disp.fill(0)
@@ -26,6 +25,9 @@ def displ_test(disp):
     disp.text('Next line code', 0, 36, 2)
     disp.show()
 
+# Task debug pins
+pin_dbg_1sec = Pin(4, Pin.OUT)
+pin_dbg_5sec = Pin(5, Pin.OUT)
 # ESP01 on UART0, GP16 and GP17
 uart0 = UART(0, baudrate=115200, tx=Pin(16), rx=Pin(17))
 # LED on Pico board
@@ -80,15 +82,7 @@ sd_spi = SPI(1,
              miso = Pin(12))
 
 # Initialize SD card
-sd = sdcard.SDCard(sd_spi, sd_cs)
-
-# Mount filesystem
-vfs = uos.VfsFat(sd)
-uos.mount(vfs, "/sd")
-
-# Create a file and write something to it
-with open("/sd/pico.txt", "w") as file:
-    file.write("1. Hello, world!\r\n")
+#vosd = sdcard.SDCard(sd_spi, sd_cs)
 
 sensor_us = HCSR04(trigger_pin=2, echo_pin=3, echo_timeout_us=30000)
 
@@ -122,53 +116,52 @@ def button_refresh(timer):
 button_timer.init(mode=Timer.PERIODIC, period=20, callback=button_refresh)
 
 # Logfile for temperatures
-#file = open("temps.txt", "w")
-file = open("/sd/pico.txt", "w")
+file = open("temps.txt", "w")
 
 pwm_pulse = 0
-sqw_val   = 0
 
-while True:
-    ledpin.toggle()
-    read_adctemp = sensor_temp.read_u16() * conversion_factor
-    adc_temperature = 27 - (read_adctemp - 0.706)/0.001721
-    battery_voltage = 3 * 3.3 * sensor_vsys3.read_u16() / 65535
-    distance = sensor_us.distance_cm()
-    print('Distance:', distance, 'cm')
-    print(f"Battery voltage: {battery_voltage}V")
-    print(f"Lightning value: {adc_1.read_u16()}")
-    sensor_dht11.measure()
-    dht11_temp = (sensor_dht11.temperature())
-    dht11_hum = (sensor_dht11.humidity())
-    print("Internal tempreature: {}C".format(adc_temperature))
-    print("Temperature: {}C".format(dht11_temp))
-    print("Humidity: {}%".format(dht11_hum))
+async def Task1sec():
+    while True:
+        # Set debug pin
+        pin_dbg_1sec.value(1)
+        ledpin.toggle()
+        distance = sensor_us.distance_cm()
+        print("1 second task")
+        print('Distance:', distance, 'cm')
+        print(rtc.PrintTime())
+        if button_gp20.checkPushed() is True:
+            pwm_pulse += 10
+            print("GP20 pressed")
+        if button_gp21.checkPushed() is True:
+            pwm_pulse -= 10
+            print("GP21 pressed") 
+        if button_gp22.checkPushed() is True:
+            print("GP22 pressed")
+        # Clear debug pin
+        pin_dbg_1sec.value(0)
+        await asyncio.sleep(1)
 
-    if button_gp20.checkPushed() is True:
-        pwm_pulse += 10
-        print("GP20 pressed")
-    if button_gp21.checkPushed() is True:
-        pwm_pulse -= 10
-        rtc.SquareWave(0, 0)
-        print("GP21 pressed")
-    if button_gp22.checkPushed() is True:
-        rtc.SquareWave(1, sqw_val)
-        if sqw_val < 3:
-            sqw_val += 1
-        else:
-            sqw_val = 0
-        print("GP22 pressed")
-    print(pwm_pulse)
-    print(bme.values)
-    print(rtc.PrintTime())
-    pwm_servo.duty_ns(pwm_pulse * 1000)
-    # Write variables into SD card
-    file.write(f"------------------------------------------------\n")
-    file.write(f"Internal temperature: {adc_temperature}C\n")
-    file.write(f"Battery voltage: {battery_voltage}V\n")
-    file.write(f"Temperature: {dht11_temp}C\n")
-    file.write(f"Humidity: {dht11_hum}%\n")
-    file.write(f"Lightning value: {adc_1.read_u16()}\n")
+async def Task5sec():
+    while True:
+        pin_dbg_5sec.value(1)
+        print("5 seconds task")
+        #read battery voltage
+        battery_voltage = 3 * 3.3 * sensor_vsys3.read_u16() / 65535
+        # Read internal temperature sensor
+        read_adctemp = sensor_temp.read_u16() * conversion_factor
+        adc_temperature = 27 - (read_adctemp - 0.706)/0.001721
+        print(f"Battery voltage: {battery_voltage}V")
+        print("Internal tempreature: {}C".format(adc_temperature))
+        print(bme.values)
+        pin_dbg_5sec.value(0)
+        await asyncio.sleep(5)
 
-    file.flush()
-    time.sleep_ms(500)
+async def main():
+    # Create tasks
+    asyncio.create_task(Task1sec())
+    asyncio.create_task(Task5sec())
+
+# Run the event loop
+loop = asyncio.get_event_loop()
+loop.create_task(main())
+loop.run_forever()
