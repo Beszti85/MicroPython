@@ -3,13 +3,14 @@ import os
 import sdcard
 from ssd1306 import SSD1306_I2C
 from neopixel import NeoPixel
-from ds1307 import DS1307
+from ds3231 import DS3231
 import time
 import utime
 from pushbutton import PushButton
 import bme280
 from hcsr04 import HCSR04
 import asyncio
+import config
 
 def displ_test(disp):
     disp.fill(0)
@@ -59,8 +60,8 @@ else:
   print('i2c devices found:', devices)
 display = SSD1306_I2C(128, 64, i2c)
 displ_test(display)
-# DS1307 RTC
-rtc = DS1307(i2c)
+# DS3231 RTC
+rtc = DS3231(i2c)
 #BME280
 bme = bme280.BME280(i2c=i2c)
 # Timer for neopixel led
@@ -119,6 +120,23 @@ button_timer.init(mode=Timer.PERIODIC, period=20, callback=button_refresh)
 file = open("temps.txt", "w")
 
 pwm_pulse = 0
+
+#
+# Send AT commands to ESP-01 to connect to local WI-Fi
+#
+def ConnectToWiFi():
+    uart0.write("AT+RST\r\n")
+    utime.sleep(5)
+    uart0.write("AT+CWMODE=1\r\n")
+    utime.sleep(1)
+    uart0.write('''AT+CWJAP="BTHomeSpot-XNH","49345xyzpq"\r\n''')
+    utime.sleep(5)
+    uart0.write("AT+CIPMUX=0\r\n")
+    utime.sleep(3)
+    uart0.write('''AT+CIPSTART="UDP","0.0.0.0",5000,5000,2\r\n''')
+    utime.sleep(3)
+
+ConnectToWiFi()
 
 async def Task1sec():
     while True:
