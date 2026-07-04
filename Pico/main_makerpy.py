@@ -168,8 +168,13 @@ async def Task5sec():
         # Read internal temperature sensor
         read_adctemp = sensor_temp.read_u16() * conversion_factor
         adc_temperature = 27 - (read_adctemp - 0.706)/0.001721
+        adc_voltage_ch0 = adc_0.read_u16() * 3.3 / 65535
+        adc_voltage_ch1 = adc_1.read_u16() * 3.3 / 65535
+        # Print everything
         print(f"Battery voltage: {battery_voltage}V")
         print("Internal tempreature: {}C".format(adc_temperature))
+        print(f"Adc voltage ch0: {adc_voltage_ch0}V")
+        print(f"Adc voltage ch1: {adc_voltage_ch1}V")
         print(bme.values)
         pin_dbg_5sec.value(0)
         await asyncio.sleep(5)
