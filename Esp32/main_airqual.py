@@ -8,13 +8,8 @@ from machine import Pin, TouchPad, Timer
 import aht
 from ssd1306 import SSD1306_SPI
 import framebuf
-import ubinascii
-from simple import MQTTClient
 
 print("Start")
-
-client_id = ubinascii.hexlify(machine.unique_id())
-client_idhex = machine.unique_id()
 
 # on board blue led
 led_pin = Pin(2, Pin.OUT)
@@ -117,37 +112,6 @@ def led_rgb_refresh(timer):
         print("Led timer: value = ", led_rgb_index)
         led_rgb_index = 0
 
-topic_sub = b'notification'
-topic_pub = b'domoticz/in'
-
-last_message = 0
-message_interval = 5
-counter = 0
-
-def sub_cb(topic, msg):
-  print((topic, msg))
-  if topic == b'notification' and msg == b'received':
-    print('ESP received hello message')
-
-def connect_and_subscribe():
-  global client_id, mqtt_server, topic_sub
-  client = MQTTClient(client_id, config.mqtt_server, user=config.mqtt_user, password=config.mqtt_pass)
-  client.set_callback(sub_cb)
-  client.connect()
-  client.subscribe(topic_sub)
-  print('Connected to %s MQTT broker, subscribed to %s topic' % (config.mqtt_server, topic_sub))
-  return client
-
-def restart_and_reconnect():
-  print('Failed to connect to MQTT broker. Reconnecting...')
-  time.sleep(10)
-  machine.reset()
-
-try:
-  client = connect_and_subscribe()
-except OSError as e:
-  restart_and_reconnect()
-
 led_rgb_timer.init(mode = Timer.PERIODIC, period=1000, callback = led_rgb_refresh)
 
 led_index = 0
@@ -183,19 +147,9 @@ while True:
     time.sleep(1)
     print("Touch value: {}".format(touch_sens.read()))
     #int_val  = i2c_board.readfrom(0x20, 1)[0]
-    #print(int_val)
+    #print(int_val) 
     #print(i2c_board.readfrom(0x20, 1))
     print('ADC0 value = {}'.format(adc0.read()))
     print('ADC5 value = {}'.format(adc5.read()))
     
-    try:
-        client.check_msg()
-        if (time.time() - last_message) > message_interval:
-            msg = f'{{"command":"udevice", "idx":7, "svalue":"{round(sensor_aht21.temperature, 2)};{round(sensor_aht21.humidity, 2)}"}}'.encode('utf-8')
-            #msg = f'{{"command":"udevice", "idx":5, "nvalue": "0", "svalue":"{round(sensor_aht21.temperature, 2)};{round(sensor_aht21.humidity, 2)}"}}'.encode('utf-8')
-            #msg = f'{"idx": 5, "nvalue": 0, "svalue":"{sensor_aht21.temperature}"}'.encode('utf-8')
-            client.publish(topic_pub, msg)
-            last_message = time.time()
-            counter += 1
-    except OSError as e:
-        restart_and_reconnect()
+
