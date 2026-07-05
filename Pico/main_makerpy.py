@@ -141,6 +141,7 @@ ConnectToWiFi()
 async def Task1sec():
     while True:
         # Set debug pin
+        global pwm_pulse
         pin_dbg_1sec.value(1)
         ledpin.toggle()
         distance = sensor_us.distance_cm()
