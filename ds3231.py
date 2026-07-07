@@ -1,12 +1,14 @@
+from micropython import const
 
 #REGISTER DEFINITIONS
-DATETIME_REG = const(0) # 0x00-0x06
-CHIP_HALT    = const(128)
-CONTROL_REG  = const(14) # 0x0E
-RAM_REG      = const(8) # 0x08-0x3F
+DATETIME_REG   = const(0) # 0x00-0x06
+CHIP_HALT      = const(128)
+CONTROL_REG    = const(14) # 0x0E
+CONTROL_STATUS = const(15) #0x0F
+RAM_REG        = const(8) # 0x08-0x3F
 
 #SQUAREWAVE OUTPUT SETTINGS
-SQW_1kHZ    = 0
+SQW_1HZ     = 0
 SQW_1024HZ  = 1
 SQW_4096HZ  = 2
 SQW_8192HZ  = 3
