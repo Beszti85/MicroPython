@@ -1,4 +1,6 @@
 from machine import Pin, UART, I2C, SPI, ADC, Timer, PWM
+import sys
+import select
 import os
 import sdcard
 from ssd1306 import SSD1306_I2C
@@ -25,6 +27,11 @@ def displ_test(disp):
     disp.text('OLED 128x64', 40, 24, 1)
     disp.text('Next line code', 0, 36, 2)
     disp.show()
+
+#Serial com via USB port
+pc_poll = select.poll()
+pc_poll.register(sys.stdin, select.POLLIN)
+
 
 # Task debug pins
 pin_dbg_1sec = Pin(4, Pin.OUT)
@@ -142,6 +149,10 @@ async def Task1sec():
     while True:
         # Set debug pin
         global pwm_pulse
+        pc_events = pc_poll.poll(0)
+        if pc_events:
+            data = sys.stdin.readline()
+            print("Recieved from PC: ", data)
         pin_dbg_1sec.value(1)
         ledpin.toggle()
         distance = sensor_us.distance_cm()
