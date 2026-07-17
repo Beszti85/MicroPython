@@ -7,8 +7,11 @@ import analogio
 import usb_midi
 import rotaryio
 import displayio
-import adafruit_ssd1322
 import busio
+import terminalio
+import fourwire
+import adafruit_ssd1322
+from  adafruit_display_text import label
 
 import adafruit_midi
 from adafruit_midi.note_on          import NoteOn
@@ -77,22 +80,35 @@ displayio.release_displays()
 
 spi = busio.SPI(board.GP18, board.GP19)
 tft_cs = board.GP17
-tft_dc = board.GP16
+tft_dc = board.GP14
+tft_rst = board.GP15
 
-display_bus = displayio.FourWire(spi, command=tft_dc, chip_select=tft_cs,
+display_bus = displayio.FourWire(spi, command=tft_dc, chip_select=tft_cs, reset=tft_rst,
                                      baudrate=1000000)
 time.sleep(1)
-display = adafruit_ssd1322.SSD1322(display_bus, width=256, height=64, colstart=28)
-
-bitmap = displayio.Bitmap(256, 64, 1)
+display = adafruit_ssd1322.SSD1322(display_bus, width=256, height=64, colstart=112)
 
 print("After display init\n")
-print("After display test\n")
+
+#Create a display context
+dispGroup = displayio.Group()
+
+bitmap = displayio.Bitmap(256, 64, 16)
+palette = displayio.Palette(16)
+palette[0] = 0x000000 #Black color
+bg_sprite = displayio.TileGrid(bitmap, pixel_shader=palette, x=0, y=0)
+dispGroup.append(bg_sprite)
+
+#Create a text label
+text = "Hello, CircuitPython!"
+text_area = label.Label(terminalio.FONT, text=text, color = 0xFFFFFF, x = 5, y = 5)
+dispGroup.append(text_area)
+display.root_group = dispGroup
 
 midi = adafruit_midi.MIDI(midi_out=usb_midi.ports[1], out_channel=0)
 
 out_pins = [board.GP2, board.GP3, board.GP4, board.GP5, board.GP8]
-kd_pins  = [board.GP13, board.GP15, board.GP14]
+kd_pins  = [board.GP13, board.GP0, board.GP1]
 
 kd_buttons = []
 s_output = []
