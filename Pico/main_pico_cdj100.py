@@ -100,7 +100,7 @@ bg_sprite = displayio.TileGrid(bitmap, pixel_shader=palette, x=0, y=0)
 dispGroup.append(bg_sprite)
 
 #Create a text label
-text = "Hello, CircuitPython!"
+text = "Hello, CircuitPython!, this is the initial\ntext message"
 text_area = label.Label(terminalio.FONT, text=text, color = 0xFFFFFF, x = 5, y = 5)
 dispGroup.append(text_area)
 display.root_group = dispGroup
