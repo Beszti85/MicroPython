@@ -84,6 +84,10 @@ async def Task1sec():
         # Set debug pin
         pin_dbg_1sec.value(1)
         refresh_rgb_leds(leds_np)
+        if button_gp20.checkPushed() is True:
+            print("GP20 pressed")
+        if button_gp21.checkPushed() is True:
+            print("GP21 pressed") 
         # Clear debug pin
         pin_dbg_1sec.value(0)
         await asyncio.sleep(1)
