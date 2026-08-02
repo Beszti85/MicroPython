@@ -11,6 +11,7 @@ import busio
 import terminalio
 import fourwire
 import adafruit_ssd1322
+from cdj100s_display import CDJDisplay
 from  adafruit_display_text import label
 
 import adafruit_midi
@@ -84,7 +85,7 @@ tft_dc = board.GP14
 tft_rst = board.GP15
 
 display_bus = displayio.FourWire(spi, command=tft_dc, chip_select=tft_cs, reset=tft_rst,
-                                     baudrate=1000000)
+                                     baudrate=4000000)
 time.sleep(1)
 display = adafruit_ssd1322.SSD1322(display_bus, width=256, height=64, colstart=112)
 
@@ -104,6 +105,11 @@ text = "Hello, CircuitPython!, this is the initial\ntext message"
 text_area = label.Label(terminalio.FONT, text=text, color = 0xFFFFFF, x = 5, y = 5)
 dispGroup.append(text_area)
 display.root_group = dispGroup
+
+time.sleep(3)
+
+# ── CDJ display ──────────────────────────────────────────────────────────────
+cdj = CDJDisplay(display)
 
 midi = adafruit_midi.MIDI(midi_out=usb_midi.ports[1], out_channel=0)
 
@@ -186,6 +192,7 @@ last_position = 0
 
 led.value = True
 
+"""
 while True:
 
     #Go through S1 - S4: output of matrix
@@ -249,3 +256,41 @@ while True:
     
     time.sleep(0.001)
             
+"""
+
+# ── Simulated playback state ─────────────────────────────────────────────────
+track    = 3
+bpm      = 128.0
+pitch    = +2.5       # %
+playing  = True
+remain   = False
+
+# First call — draw everything once
+cdj.update(track=3, time_str="0:00.00", bpm=128.0,
+           pitch=2.5, progress=0.0, playing=True)
+
+start_time  = time.monotonic()
+blink_timer = time.monotonic()
+TRACK_LEN   = 4 * 60 + 33   # 4:33 in seconds
+
+while True:
+    now = time.monotonic()
+
+    # Blink every 500ms
+    if now - blink_timer >= 0.5:
+        cdj.toggle_blink()
+        blink_timer = now
+
+    # Compute elapsed
+    elapsed = now - start_time
+    total_cs = int(elapsed * 100)
+    m  = total_cs // 6000
+    s  = (total_cs % 6000) // 100
+    cs = total_cs % 100
+    time_str = "{:d}:{:02d}.{:02d}".format(m, s, cs)
+
+    # Only redraw what changed
+    cdj.update_time(time_str)
+    cdj.update_progress(elapsed / 273.0)   # 4:33 track
+
+    time.sleep(0.05)
