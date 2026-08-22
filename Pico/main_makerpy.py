@@ -90,7 +90,7 @@ sd_spi = SPI(1,
              miso = Pin(12))
 
 # Initialize SD card
-#vosd = sdcard.SDCard(sd_spi, sd_cs)
+vosd = sdcard.SDCard(sd_spi, sd_cs)
 
 sensor_us = HCSR04(trigger_pin=2, echo_pin=3, echo_timeout_us=30000)
 
