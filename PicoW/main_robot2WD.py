@@ -40,8 +40,11 @@ sd_spi = SPI(0,
              mosi = Pin(19),
              miso = Pin(16))
 
-# Initialize SD card
-vosd = sdcard.SDCard(sd_spi, sd_cs)
+try:
+    # Initialize SD card
+    vosd = sdcard.SDCard(sd_spi, sd_cs)
+except OSError:
+    print("No SD card")
 
 print("LED starts flashing...")
 while True:
