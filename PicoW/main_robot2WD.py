@@ -4,17 +4,20 @@ import sys
 import select
 import os
 import sdcard
+from pcf8523 import PCF8523
 
 #Board led
 Led_Brd = Pin("LED", Pin.OUT)
 
-#I2C0: PCF8583 RTC
+#I2C0: PCF8523 RTC
 i2c0 = I2C(0, sda=Pin(4), scl=Pin(5), freq=400000)
 devices = i2c0.scan()
 if len(devices) == 0:
   print("No i2c device !")
 else:
   print('i2c devices found:', devices)
+#RTC init
+rtc = PCF8523(i2c0)
 
 #ADC
 #adc ports
@@ -44,12 +47,13 @@ try:
     # Initialize SD card
     vosd = sdcard.SDCard(sd_spi, sd_cs)
 except OSError:
-    print("No SD card")
+    print("No SD cardid")
 
 print("LED starts flashing...")
 while True:
     try:
         Led_Brd.toggle()
+        print(rtc.PrintTime())
         sleep(1) # sleep 1sec
     except KeyboardInterrupt:
         break
