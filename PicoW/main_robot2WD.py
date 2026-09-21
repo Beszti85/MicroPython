@@ -1,4 +1,4 @@
-from machine import Pin, I2C, SPI, ADC, Timer, PWM
+from machine import Pin, I2C, SPI, ADC, UART, Timer, PWM
 from utime import sleep
 import sys
 import select
@@ -8,6 +8,9 @@ from pcf8523 import PCF8523
 
 #Board led
 Led_Brd = Pin("LED", Pin.OUT)
+
+#debug UART
+pc_uart = UART(0, baudrate = 9600, tx = Pin(0), rx = Pin(1))
 
 #I2C0: PCF8523 RTC
 i2c0 = I2C(0, sda=Pin(4), scl=Pin(5), freq=400000)
@@ -30,7 +33,6 @@ conversion_factor = 3.3 / (65535)
 # Pico: ADC3 used for VSYS/3
 adc_bat = ADC(Pin(29))
 
-#SD CARD
 # SD card
 sd_cs = Pin(17, Pin.OUT, value = 1)
 sd_spi = SPI(0,
@@ -48,6 +50,14 @@ try:
     vosd = sdcard.SDCard(sd_spi, sd_cs)
 except OSError:
     print("No SD cardid")
+
+#----------- MOTOR PINS ---------------
+# Motor1
+motor1_pin1 = Pin(2, Pin.OUT)
+motor1_pin2 = Pin(3, Pin.OUT)
+# Motor1
+motor2_pin1 = Pin(6, Pin.OUT)
+motor2_pin2 = Pin(7, Pin.OUT)
 
 print("LED starts flashing...")
 while True:
