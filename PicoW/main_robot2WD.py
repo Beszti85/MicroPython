@@ -9,8 +9,22 @@ from pcf8523 import PCF8523
 #Board led
 Led_Brd = Pin("LED", Pin.OUT)
 
-#debug UART
+# PC debug UART
 pc_uart = UART(0, baudrate = 9600, tx = Pin(0), rx = Pin(1))
+
+pc_rx_data = None   # data received by last IRQ
+pc_rx_flag = False  # Flag to indicate new UART RX packet
+
+# PC UART IRQ handler function
+def pc_uart_rx_handler(uart_obj):
+    global pc_rx_data, pc_rx_flag
+    if uart_obj.any():
+        pc_rx_data = uart_obj.read()
+        pc_rx_flag = True
+
+# UART.IRQ_RXIDLE fires once the RX line has been idle after receiving
+# data, so the handler runs with the whole message already in the buffer.
+pc_uart.irq(handler = pc_uart_rx_handler, trigger=UART.IRQ_RXIDLE )
 
 #I2C0: PCF8523 RTC
 i2c0 = I2C(0, sda=Pin(4), scl=Pin(5), freq=400000)
