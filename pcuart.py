@@ -43,6 +43,6 @@ def PcUartProtHandler(payload):
         case PCUART_READ_DATA:
             pcdatareadwrite.PcUartReadDataHandler(payload[1])
         case PCUART_WRITE_DATA:
-            pass
+            pcdatareadwrite.PcUartWriteDataHandler(payload[1:])
         case PCUART_CMD_EXEC:
             pass
