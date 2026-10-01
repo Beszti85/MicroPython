@@ -31,6 +31,7 @@ def PcUartProcessInputFrame(payload):
             responseFrame.append(0)
             responseFrame.append(0)
             responseFrame.append(payload[4] | 0x80)
+            responseFrame.append(PcUartProtHandler(payload[4:4+cmdLength]))
             
 def PcUartProtHandler(payload):
     # response buffer
@@ -46,3 +47,5 @@ def PcUartProtHandler(payload):
             pcdatareadwrite.PcUartWriteDataHandler(payload[1:])
         case PCUART_CMD_EXEC:
             pass
+        
+    return respBuffer
