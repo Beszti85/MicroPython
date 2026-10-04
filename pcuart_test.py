@@ -12,6 +12,16 @@ logging.basicConfig(filename=log_filename, level=logging.DEBUG, format = '%(asct
 START_BYTE = const(0xBE)
 STOP_BYTE  = const(0x27)
 
+def PcUartSendReadRequest(id):
+    request = [1, id]
+    pc_payload = CreatePcPayload(request)
+    pcuart.PcUartProcessInputFrame(pc_payload)
+
+def PcUartSendCmdRequest(id):
+    request = [3, id]
+    pc_payload = CreatePcPayload(request)
+    pcuart.PcUartProcessInputFrame(pc_payload)
+
 def CreatePcPayload(request):
     payload_length = len(request)
     retval = bytearray(6 + payload_length)
