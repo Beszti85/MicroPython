@@ -1,16 +1,11 @@
 import pcuart
 import logging
-from math import const
 from datetime import datetime
 import tools
+import os
 
-log = logging.getLogger(__name__)
-log_filename = datetime.now().strftime("Logs/logfile_%Y%m%d_%H%M%S.log")
-
-logging.basicConfig(filename=log_filename, level=logging.DEBUG, format = '%(asctime)s - %(levelname)s - %(message)s')
-
-START_BYTE = const(0xBE)
-STOP_BYTE  = const(0x27)
+START_BYTE = 0xBE
+STOP_BYTE  = 0x27
 
 def PcUartSendReadRequest(id):
     request = [1, id]
@@ -43,8 +38,17 @@ def CreatePcPayload(request):
     return retval
 
 def main():
+    #create Logs folder if it does not exist
+    if not os.path.exists("Logs"):
+        os.makedirs("Logs")
+    
+    log = logging.getLogger(__name__)
+    log_filename = datetime.now().strftime("Logs/logfile_%Y%m%d_%H%M%S.log")
+
+    logging.basicConfig(filename=log_filename, level=logging.DEBUG, format = '%(asctime)s - %(levelname)s - %(message)s')
     
     # default payload
-    
-    
-    pcuart.PcUartProcessInputFrame()
+    PcUartSendReadRequest(0)
+
+if __name__ == "__main__":
+    main()
