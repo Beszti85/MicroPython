@@ -1,10 +1,10 @@
-from micropython import const
 import pcdatareadwrite
 
-PCUART_CONNECT    = const(0)
-PCUART_READ_DATA  = const(1)
-PCUART_WRITE_DATA = const(2)
-PCUART_CMD_EXEC   = const(3)
+class PcUartProtIds:
+    PCUART_CONNECT    = 0
+    PCUART_READ_DATA  = 1
+    PCUART_WRITE_DATA = 2
+    PCUART_CMD_EXEC   = 3
 
 def PcUartCrc8(start, payload):
     retval = start & 0xFF
@@ -33,19 +33,29 @@ def PcUartProcessInputFrame(payload):
             responseFrame.append(payload[4] | 0x80)
             responseFrame.append(PcUartProtHandler(payload[4:4+cmdLength]))
             
+    else:
+        # invalid frame
+        responseFrame.append(0xBE)
+        responseFrame.append(0)
+        responseFrame.append(0)
+        responseFrame.append(0xFF)
+        responseFrame.append(0xFF)
+        
+    return responseFrame
+            
 def PcUartProtHandler(payload):
     # response buffer
     respBuffer = []
     cmdCode = payload[0]
     # Process the command code
     match cmdCode:
-        case PCUART_CONNECT:
+        case PcUartProtIds.PCUART_CONNECT:
             respBuffer.append(0x12)
-        case PCUART_READ_DATA:
+        case PcUartProtIds.PCUART_READ_DATA:
             pcdatareadwrite.PcUartReadDataHandler(payload[1])
-        case PCUART_WRITE_DATA:
+        case PcUartProtIds.PCUART_WRITE_DATA:
             pcdatareadwrite.PcUartWriteDataHandler(payload[1:])
-        case PCUART_CMD_EXEC:
+        case PcUartProtIds.PCUART_CMD_EXEC:
             pass
         
     return respBuffer
