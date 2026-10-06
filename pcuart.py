@@ -52,7 +52,7 @@ def PcUartProtHandler(payload):
         case PcUartProtIds.PCUART_CONNECT:
             respBuffer.append(0x12)
         case PcUartProtIds.PCUART_READ_DATA:
-            pcdatareadwrite.PcUartReadDataHandler(payload[1])
+            respBuffer.extend(pcdatareadwrite.PcUartReadDataHandler(payload[1]))
         case PcUartProtIds.PCUART_WRITE_DATA:
             pcdatareadwrite.PcUartWriteDataHandler(payload[1:])
         case PcUartProtIds.PCUART_CMD_EXEC:

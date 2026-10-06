@@ -12,7 +12,8 @@ def PcUartReadDataHandler(readId):
     retval = None
     match readId:
         case PcDataReadWriteIds.PC_RD_BOARD_ID:
-            retval = "PicoW_2WD_Car"
+            retval = bytearray("PicoW_2WD_Car", "utf-8")
+            print(" ".join(f"0x{b:02x}" for b in retval))
         case PcDataReadWriteIds.PC_RW_RTC_READ_TIME:
             retval = rtc.DateTime()
             
