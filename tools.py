@@ -6,6 +6,7 @@ import logging
 log = logging.getLogger(__name__)
 
 def log_bytearray(data, level):
+    print(type(data))
     list_data = list(data)
     #log the input based on loglevel
     if level == "ERROR":
@@ -15,4 +16,4 @@ def log_bytearray(data, level):
     elif level == "DEBUG":
         log.debug([hex(item) for item in list_data])
     else:
-        print([hex(item for item in list_data)])
+        print([hex(item) for item in list_data])

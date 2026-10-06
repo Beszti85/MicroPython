@@ -10,12 +10,12 @@ STOP_BYTE  = 0x27
 def PcUartSendReadRequest(id):
     request = [1, id]
     pc_payload = CreatePcPayload(request)
-    pcuart.PcUartProcessInputFrame(pc_payload)
+    return pcuart.PcUartProcessInputFrame(pc_payload)
 
 def PcUartSendCmdRequest(id):
     request = [3, id]
     pc_payload = CreatePcPayload(request)
-    pcuart.PcUartProcessInputFrame(pc_payload)
+    return pcuart.PcUartProcessInputFrame(pc_payload)
 
 def CreatePcPayload(request):
     payload_length = len(request)
@@ -48,7 +48,7 @@ def main():
     logging.basicConfig(filename=log_filename, level=logging.DEBUG, format = '%(asctime)s - %(levelname)s - %(message)s')
     
     # default payload
-    PcUartSendReadRequest(0)
+    tools.log_bytearray(PcUartSendReadRequest(0), "DEBUG")
 
 if __name__ == "__main__":
     main()
