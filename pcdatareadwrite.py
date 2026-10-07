@@ -1,4 +1,9 @@
 # Read and Write data to/from PC via UART
+import sys
+if sys.implementation.name == "micropython":
+    from main import rtc
+else:
+    from stubfunctions import rtc
 
 class PcDataReadWriteIds:
     PC_RD_BOARD_ID       = 0
