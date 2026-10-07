@@ -49,6 +49,7 @@ def main():
     
     # default payload
     tools.log_bytearray(PcUartSendReadRequest(0), "DEBUG")
+    tools.log_bytearray(PcUartSendReadRequest(4), "DEBUG")
 
 if __name__ == "__main__":
     main()
