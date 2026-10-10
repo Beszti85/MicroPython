@@ -21,6 +21,11 @@ def PcUartReadDataHandler(readId):
             print(" ".join(f"0x{b:02x}" for b in retval))
         case PcDataReadWriteIds.PC_RW_RTC_READ_TIME:
             retval = rtc.DateTime()
+        case PcDataReadWriteIds.PC_RD_ADC_PHY_VALUES:
+            retval = bytearray([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
+        case _:
+            # Not used Id: return error code 0xFD
+            retval = bytearray([0xFE])
             
     return retval
         
@@ -30,3 +35,6 @@ def PcUartWriteDataHandler(payload):
     match writeId:
         case PcDataReadWriteIds.PC_RW_RTC_READ_TIME:
             pass
+        case _:
+            # Not used Id: return error code 0xFD
+            retval = bytearray([0xFE])
