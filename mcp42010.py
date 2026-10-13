@@ -27,6 +27,21 @@ class MCP42010:
         self.cmd_data[1] = wiper
         self.spi_write()
         
+    def shutdown(self, pot):
+        # send the shutdown command to the given Pot or both Pots
+        if pot == 0:           #shutdown pot 0
+            command = 0x21
+        elif pot == 1:         #shutdown pot 1
+            command = 0x22
+        elif pot == 2:         #shutdown both pots
+            command = 0x23
+        else:
+            raise ValueError("Pot must be 0 or 2")
+
+        self.cmd_data[0] = command
+        self.cmd_data[1] = 0x00
+        self.spi_write()
+        
     def spi_write(self):
         self.cs.value(0)  # Select the device
         self.spi.write(self.cmd_data)
