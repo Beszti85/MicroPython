@@ -5,6 +5,23 @@ import time
 Led1 = Pin(24, Pin.OUT)
 Led2 = Pin(25, Pin.OUT)
 
+# PC debug UART
+pc_uart = UART(0, baudrate = 9600, tx = Pin(0), rx = Pin(1))
+
+pc_rx_data = None   # data received by last IRQ
+pc_rx_flag = False  # Flag to indicate new UART RX packet
+
+# PC UART IRQ handler function
+def pc_uart_rx_handler(uart_obj):
+    global pc_rx_data, pc_rx_flag
+    if uart_obj.any():
+        pc_rx_data = uart_obj.read()
+        pc_rx_flag = True
+
+# UART.IRQ_RXIDLE fires once the RX line has been idle after receiving
+# data, so the handler runs with the whole message already in the buffer.
+pc_uart.irq(handler = pc_uart_rx_handler, trigger=UART.IRQ_RXIDLE )
+
 #ADC
 #adc ports
 adc26 = ADC(26)
@@ -32,6 +49,9 @@ while(1):
     sensor_temp_value = sensor_temp.read_u16() * conversion_factor
     adc_temperature = 27 - (sensor_temp_value - 0.706)/0.001721
     print("Chip temperature: ", adc_temperature, "°C")
+    if pc_rx_flag:
+        print("Received data from PC: ", pc_rx_data)
+        pc_rx_flag = False
     Led1.value(1)
     Led2.value(0)
     time.sleep(1)
