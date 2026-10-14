@@ -21,6 +21,17 @@ spi1 = SPI(1, baudrate=1000000, polarity=0, phase=0, sck=Pin(10), mosi=Pin(11), 
 pot_mcp42010 = MCP42010(spi1, CS_MCP42010)
 
 while(1):
+    adc26_value = adc26.read_u16() * conversion_factor
+    adc27_value = adc27.read_u16() * conversion_factor
+    adc28_value = adc28.read_u16() * conversion_factor
+    adc29_value = adc29.read_u16() * conversion_factor
+    print("ADC26: ", adc26_value, "V")
+    print("ADC27: ", adc27_value, "V")
+    print("ADC28: ", adc28_value, "V")
+    print("ADC29: ", adc29_value, "V")
+    sensor_temp_value = sensor_temp.read_u16() * conversion_factor
+    adc_temperature = 27 - (sensor_temp_value - 0.706)/0.001721
+    print("Chip temperature: ", adc_temperature, "°C")
     Led1.value(1)
     Led2.value(0)
     time.sleep(1)
