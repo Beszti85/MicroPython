@@ -48,14 +48,13 @@ def PcUartProtHandler(payload):
     respBuffer = []
     cmdCode = payload[0]
     # Process the command code
-    match cmdCode:
-        case PcUartProtIds.PCUART_CONNECT:
-            respBuffer.append(0x12)
-        case PcUartProtIds.PCUART_READ_DATA:
-            respBuffer.extend(pcdatareadwrite.PcUartReadDataHandler(payload[1]))
-        case PcUartProtIds.PCUART_WRITE_DATA:
-            pcdatareadwrite.PcUartWriteDataHandler(payload[1:])
-        case PcUartProtIds.PCUART_CMD_EXEC:
-            pass
+    if cmdCode == PcUartProtIds.PCUART_CONNECT:
+        respBuffer.append(0x12)
+    elif cmdCode == PcUartProtIds.PCUART_READ_DATA:
+        respBuffer.extend(pcdatareadwrite.PcUartReadDataHandler(payload[1]))
+    elif cmdCode == PcUartProtIds.PCUART_WRITE_DATA:
+        pcdatareadwrite.PcUartWriteDataHandler(payload[1:])
+    elif cmdCode == PcUartProtIds.PCUART_CMD_EXEC:
+        pass
         
     return respBuffer
