@@ -1,5 +1,6 @@
 from machine import Pin, ADC, SPI, UART, Timer
 from mcp42010 import MCP42010
+import pcuart
 import time
 
 Led1 = Pin(24, Pin.OUT)
@@ -51,6 +52,10 @@ while(1):
     print("Chip temperature: ", adc_temperature, "°C")
     if pc_rx_flag:
         print("Received data from PC: ", pc_rx_data)
+        response = pcuart.PcUartProcessInputFrame(pc_rx_data)
+        if response:
+            pc_uart.write(response)
+            print("Sent response to PC: ", response)
         pc_rx_flag = False
     Led1.value(1)
     Led2.value(0)
