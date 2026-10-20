@@ -7,6 +7,11 @@ import os
 START_BYTE = 0xBE
 STOP_BYTE  = 0x27
 
+def PcUartSendConnectRequest():
+    request = [0]
+    pc_payload = CreatePcPayload(request)
+    return pcuart.PcUartProcessInputFrame(pc_payload)
+
 def PcUartSendReadRequest(id):
     request = [1, id]
     pc_payload = CreatePcPayload(request)
@@ -48,6 +53,7 @@ def main():
     logging.basicConfig(filename=log_filename, level=logging.DEBUG, format = '%(asctime)s - %(levelname)s - %(message)s')
     
     # default payload
+    tools.log_bytearray(PcUartSendConnectRequest(), "DEBUG")
     tools.log_bytearray(PcUartSendReadRequest(0), "DEBUG")
     tools.log_bytearray(PcUartSendReadRequest(4), "DEBUG")
     tools.log_bytearray(PcUartSendReadRequest(2), "DEBUG")
