@@ -15,6 +15,7 @@ class PcDataReadWriteIds:
 
 def PcUartReadDataHandler(readId):
     retval = None
+    print("Read data request from PC with ID: ", readId)
     if readId == PcDataReadWriteIds.PC_RD_BOARD_ID:
         retval = bytearray("PicoW_2WD_Car", "utf-8")
         print(" ".join("0x{:02x}".format(b) for b in retval))
@@ -23,7 +24,7 @@ def PcUartReadDataHandler(readId):
     elif readId == PcDataReadWriteIds.PC_RD_ADC_PHY_VALUES:
         retval = bytearray([0x00] * 8)
     else:
-        # Not used Id: return error code 0xFD
+        # Not used Id: return error code 0xFE
         retval = bytearray([0xFE])
             
     return retval
@@ -34,5 +35,5 @@ def PcUartWriteDataHandler(payload):
     if writeId == PcDataReadWriteIds.PC_RW_RTC_READ_TIME:
         pass
     else:
-        # Not used Id: return error code 0xFD
+        # Not used Id: return error code 0xFE
         return bytearray([0xFE])
