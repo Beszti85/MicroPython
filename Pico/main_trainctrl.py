@@ -25,9 +25,7 @@ def pc_uart_rx_handler(uart_obj):
 pc_uart.irq(handler = pc_uart_rx_handler, trigger=UART.IRQ_RXIDLE )
 
 while(1):
-    for i in range(4):
-        adc_value = hw.adc_list[i].read_u16() * hw.conversion_factor
-        #print("ADC{}: {} V".format(26+i, adc_value))
+    hw.adc_values_read()  # Update ADC values
     sensor_temp_value = hw.sensor_temp.read_u16() * hw.conversion_factor
     adc_temperature = 27 - (sensor_temp_value - 0.706)/0.001721
     #print("Chip temperature: ", adc_temperature, "°C")
