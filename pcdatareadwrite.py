@@ -1,9 +1,6 @@
 # Read and Write data to/from PC via UART
 import sys
-if sys.implementation.name == "micropython":
-    from main import rtc
-else:
-    from stubfunctions import rtc
+import hardware_trainctrl as hw
 
 class PcDataReadWriteIds:
     PC_RD_BOARD_ID       = 0
@@ -22,7 +19,7 @@ def PcUartReadDataHandler(readId):
     elif readId == PcDataReadWriteIds.PC_RW_RTC_READ_TIME:
         retval = rtc.DateTime()
     elif readId == PcDataReadWriteIds.PC_RD_ADC_PHY_VALUES:
-        retval = bytearray([0x00] * 8)
+        retval = bytearray(hw.read_adc_mv_values())
     else:
         # Not used Id: return error code 0xFE
         retval = bytearray([0xFE])
