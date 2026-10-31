@@ -6,8 +6,9 @@ import time
 import asyncio
 from asyncio import Event
 
-Led1 = Pin(24, Pin.OUT)
-Led2 = Pin(25, Pin.OUT)
+Led1 = Pin(24, Pin.OUT, value = 0)
+Led2 = Pin(25, Pin.OUT, value = 1)
+
 
 # PC debug UART
 pc_uart = UART(0, baudrate = 115200, tx = Pin(0), rx = Pin(1))
@@ -26,6 +27,25 @@ async def event_PcUartRx():
             print(f"Sent response to PC: {response}")
         pc_rx_flag.clear()
 
+event_100msperiodic = asyncio.Event()
+cnt_100msperiodic = 0
+
+async def event_PeriodicTask():
+    global cnt_100msperiodic
+    while True:
+        # Perform periodic tasks here
+        await event_100msperiodic.wait()
+        cnt_100msperiodic += 1
+        hw.adc_values_read()  # Update ADC values
+        if cnt_100msperiodic == 10:  # Every 1 second
+            cnt_100msperiodic = 0
+            Led1.toggle()
+            Led2.toggle()
+            sensor_temp_value = hw.sensor_temp.read_u16() * hw.conversion_factor
+            adc_temperature = 27 - (sensor_temp_value - 0.706)/0.001721
+            print("Chip temperature: ", adc_temperature, "°C")
+        event_100msperiodic.clear()
+
 # PC UART IRQ handler function
 def pc_uart_rx_handler(uart_obj):
     global pc_rx_data, pc_rx_flag
@@ -34,19 +54,19 @@ def pc_uart_rx_handler(uart_obj):
         pc_rx_data = uart_obj.read()
         pc_rx_flag.set()
 
+def periodic_timer_callback(timer):
+    event_100msperiodic.set()
+        
+timer_led = Timer(mode = Timer.PERIODIC, period = 100, callback = periodic_timer_callback)  # 1000 ms = 1 second
+
 # UART.IRQ_RXIDLE fires once the RX line has been idle after receiving
 # data, so the handler runs with the whole message already in the buffer.
 pc_uart.irq(handler = pc_uart_rx_handler, trigger=UART.IRQ_RXIDLE )
 
 async def main():
     asyncio.create_task(event_PcUartRx())
+    asyncio.create_task(event_PeriodicTask())
     while True:
-        hw.adc_values_read()  # Update ADC values
-        sensor_temp_value = hw.sensor_temp.read_u16() * hw.conversion_factor
-        adc_temperature = 27 - (sensor_temp_value - 0.706)/0.001721
-        #print("Chip temperature: ", adc_temperature, "°C")
-        Led1.toggle()
-        Led2.toggle()
         await asyncio.sleep(1)
 
 asyncio.run(main())

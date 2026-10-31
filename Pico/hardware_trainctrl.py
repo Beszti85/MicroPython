@@ -30,6 +30,7 @@ def adc_values_read():
         adc_mv_values[i] = int(adc_voltages[i] * 1000)
         if DBG_PRINT:
             print("ADC{}: {} V".format(26+i, adc_voltages[i]))
+            print("ADC{}: {} mV".format(26+i, adc_mv_values[i]))
 
 # ADC reader function
 def read_adc_raw_values():
