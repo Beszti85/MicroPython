@@ -8,7 +8,9 @@ from asyncio import Event
 
 Led1 = Pin(24, Pin.OUT, value = 0)
 Led2 = Pin(25, Pin.OUT, value = 1)
-
+# Timer debug pin
+TimerDebug = Pin(2, Pin.OUT, value = 0)
+DebugAdc = Pin(3, Pin.OUT, value = 0)
 
 # PC debug UART
 pc_uart = UART(0, baudrate = 115200, tx = Pin(0), rx = Pin(1))
@@ -27,7 +29,7 @@ async def event_PcUartRx():
             print(f"Sent response to PC: {response}")
         pc_rx_flag.clear()
 
-event_100msperiodic = asyncio.Event()
+event_100msperiodic = asyncio.ThreadSafeFlag()
 cnt_100msperiodic = 0
 
 async def event_PeriodicTask():
@@ -35,9 +37,12 @@ async def event_PeriodicTask():
     while True:
         # Perform periodic tasks here
         await event_100msperiodic.wait()
+        DebugAdc.toggle()
         cnt_100msperiodic += 1
         hw.adc_values_read()  # Update ADC values
         if cnt_100msperiodic == 10:  # Every 1 second
+            #update the filtered ADC values and voltages
+            hw.adc_filter_update()
             cnt_100msperiodic = 0
             Led1.toggle()
             Led2.toggle()
@@ -45,6 +50,7 @@ async def event_PeriodicTask():
             adc_temperature = 27 - (sensor_temp_value - 0.706)/0.001721
             print("Chip temperature: ", adc_temperature, "°C")
         event_100msperiodic.clear()
+        DebugAdc.toggle()
 
 # PC UART IRQ handler function
 def pc_uart_rx_handler(uart_obj):
@@ -55,6 +61,8 @@ def pc_uart_rx_handler(uart_obj):
         pc_rx_flag.set()
 
 def periodic_timer_callback(timer):
+    # DEBUG pin
+    TimerDebug.toggle()        
     event_100msperiodic.set()
         
 timer_led = Timer(mode = Timer.PERIODIC, period = 100, callback = periodic_timer_callback)  # 1000 ms = 1 second
