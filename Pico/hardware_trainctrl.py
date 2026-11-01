@@ -9,7 +9,12 @@ adc27 = ADC(27)
 adc28 = ADC(28)
 adc29 = ADC(29)
 adc_list = [adc26, adc27, adc28, adc29]
-adc_raw_values = [0, 0, 0, 0]
+adc_raw_values_26 = []
+adc_raw_values_27 = []
+adc_raw_values_28 = []
+adc_raw_values_29 = []
+adc_raw_values = [adc_raw_values_26, adc_raw_values_27, adc_raw_values_28, adc_raw_values_29]
+adc_filtered_values = [0, 0, 0, 0]
 adc_voltages = [0.0, 0.0, 0.0, 0.0]
 adc_mv_values = [0, 0, 0, 0]
 
@@ -25,12 +30,22 @@ pot_mcp42010 = MCP42010(spi1, CS_MCP42010)
 def adc_values_read():
     global adc_raw_values, adc_voltages
     for i in range(4):
-        adc_raw_values[i] = adc_list[i].read_u16()
-        adc_voltages[i] = adc_raw_values[i] * conversion_factor
-        adc_mv_values[i] = int(adc_voltages[i] * 1000)
-        if DBG_PRINT:
-            print("ADC{}: {} V".format(26+i, adc_voltages[i]))
-            print("ADC{}: {} mV".format(26+i, adc_mv_values[i]))
+        adc_raw_values[i].append(adc_list[i].read_u16())
+
+def adc_filter_update():
+    global adc_filtered_values, adc_voltages, adc_mv_values
+    for i in range(4):
+        if len(adc_raw_values[i]) > 0:
+            adc_filtered_values[i] = int(sum(adc_raw_values[i]) / len(adc_raw_values[i]))
+            adc_voltages[i] = adc_filtered_values[i] * conversion_factor
+            adc_mv_values[i] = int(adc_voltages[i] * 1000)
+    if DBG_PRINT:
+        print("ADC filtered values: ", adc_filtered_values)
+        print("ADC voltages: ", adc_voltages)
+        print("ADC mV values: ", adc_mv_values)
+    # Clear the raw values after filtering to avoid memory growth
+    for i in range(4):
+        adc_raw_values[i].clear()
 
 # ADC reader function
 def read_adc_raw_values():
