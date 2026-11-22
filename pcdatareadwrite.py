@@ -9,6 +9,7 @@ class PcDataReadWriteIds:
     PC_RD_FLASH_ID       = 3
     PC_RW_RTC_READ_TIME  = 4
     PC_RD_FLASH_READ     = 5
+    PC_RD_BOARD_TEMP     = 6
 
 def PcUartReadDataHandler(readId):
     retval = None
@@ -20,6 +21,8 @@ def PcUartReadDataHandler(readId):
         retval = rtc.DateTime()
     elif readId == PcDataReadWriteIds.PC_RD_ADC_PHY_VALUES:
         retval = bytearray(hw.read_adc_mv_values())
+    elif readId == PcDataReadWriteIds.PC_RD_BOARD_TEMP:
+        retval = bytearray((int)(hw.read_chip_temperature() * 100))
     else:
         # Not used Id: return error code 0xFE
         retval = bytearray([0xFE])
